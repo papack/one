@@ -1,0 +1,2 @@
+- clientruntime an den richten ort und sauber aufbauen..
+- app.html aufbauen (jsx renderer)
