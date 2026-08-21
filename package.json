@@ -1,0 +1,15 @@
+{
+  "name": "herbert",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx main.ts"
+  },
+  "keywords": [],
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12"
+  }
+}
