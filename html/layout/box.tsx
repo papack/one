@@ -69,7 +69,7 @@ export interface BoxProps {
   [key: string]: unknown;
 }
 
-export function Box(p: BoxProps, children: any[]) {
+export function Box(p: BoxProps) {
   const {
     m,
     mb,
@@ -118,7 +118,7 @@ export function Box(p: BoxProps, children: any[]) {
     bg,
 
     style: customStyle,
-    children: _children,
+    children,
 
     ...attrs
   } = p;
