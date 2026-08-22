@@ -1,1 +1,6 @@
-- jsx renderer for html
+- JSX renderer for HTML.
+- Use `class` for CSS classes: `<div class="card" />`.
+- Write inline styles directly: `<div style="color:red" />`.
+- Or use `css()` for a style object: `<div style={css({ color: "red" })} />`.
+- `css()` converts camelCase properties to kebab-case and returns an inline CSS string.
+- `true` renders a boolean attribute; `false`, `null`, and `undefined` are omitted.

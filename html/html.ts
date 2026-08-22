@@ -53,10 +53,6 @@ function renderAttributes(props: Record<string, unknown>): string {
     .filter(([key]) => key !== "children")
     .filter(([, value]) => value != null && value !== false)
     .map(([key, value]) => {
-      if (key === "className") {
-        key = "class";
-      }
-
       // disabled={true} -> disabled
       if (value === true) {
         return ` ${key}`;
