@@ -3,6 +3,8 @@ import { Feat } from "./playground/feature.js";
 import { Router } from "./Router.js";
 export type AppType = typeof app;
 import { readFile } from "node:fs/promises";
+import { html } from "./html/html.js";
+import { jsxTestPage } from "./playground/html.js";
 
 const app = {
   router: new Router({
@@ -13,6 +15,7 @@ const app = {
 };
 
 //await new Feat({ app }).init();
+jsxTestPage(app);
 
 //try things:
 const result = await build({

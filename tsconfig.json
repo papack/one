@@ -2,8 +2,11 @@
   "compilerOptions": {
     "types": ["node"],
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "jsx": "react",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "fragment",
+    "moduleResolution": "Bundler",
     "strict": true,
     "outDir": "dist"
   },

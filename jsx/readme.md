@@ -1,0 +1,2 @@
+- jsx node..
+- renderer decide what to render.. (html, pdf, mail etc...)
