@@ -1,14 +1,12 @@
-# herbert.js
+# @papack/one
 
 i try to archive this:
 
 ```typescript
 const app = {
   router: new Router(), //herbert
-  html: new Html(), // herbert
   bus: new Bus(), // herbert
   email: new Email(), // herbert
-  pdf: new Pdf(), // herbert
   db: new Database(), // user supplyed
 };
 

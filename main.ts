@@ -1,9 +1,8 @@
 import { build } from "esbuild";
 import { Feat } from "./playground/feature.js";
-import { Router } from "./Router.js";
+import { Router } from "./router/router.js";
 export type AppType = typeof app;
 import { readFile } from "node:fs/promises";
-import { html } from "./html/html.js";
 import { jsxTestPage } from "./playground/html.js";
 
 const app = {

@@ -1,2 +1,3 @@
+- for / show / repeat testen und test schreiben
 - alle Layoutelemente in html einfügen und exportieren
 - style übernemhem
