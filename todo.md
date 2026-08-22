@@ -1,2 +1,2 @@
-- clientruntime an den richten ort und sauber aufbauen..
-- app.html aufbauen (jsx renderer)
+- alle Layoutelemente in html einfügen und exportieren
+- style übernemhem

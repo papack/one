@@ -1,5 +1,5 @@
 import { jsx, fragment } from "../jsx";
-import { html } from "../html";
+import { Box, html } from "../html";
 import { AppType } from "../main";
 
 export function jsxTestPage(app: AppType) {
@@ -8,6 +8,9 @@ export function jsxTestPage(app: AppType) {
       await html(
         <>
           <div>Hello</div>
+          <Box b="1px dashed hotpink" p="8px">
+            inhalt der box
+          </Box>
           <div>
             <User />
           </div>
@@ -20,6 +23,6 @@ export function jsxTestPage(app: AppType) {
   });
 }
 
-function User() {
+async function User() {
   return <div>User</div>;
 }
