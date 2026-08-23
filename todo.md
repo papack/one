@@ -1,3 +1,11 @@
-- for / show / repeat testen und test schreiben
-- alle Layoutelemente in html einfügen und exportieren
-- style übernemhem
+# Next Step
+
+- client runtime
+
+# Roadmap
+
+1. everything for ssr/html rending + auth(sessions)
+
+2. pdf rendering
+
+3. sending emails
