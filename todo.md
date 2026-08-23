@@ -1,6 +1,6 @@
 # Next Step
 
-- client runtime
+- sessions
 
 # Roadmap
 
