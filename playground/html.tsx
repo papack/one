@@ -1,6 +1,7 @@
-import { jsx, fragment } from "../jsx";
-import { Box, html } from "../html";
+import { jsx, fragment, Repeat } from "../jsx";
+import { Box, html, Stack } from "../html";
 import { AppType } from "../main";
+import { space } from "../style";
 
 export function jsxTestPage(app: AppType) {
   app.router.add("GET", "/jsx", async () => {
@@ -8,9 +9,13 @@ export function jsxTestPage(app: AppType) {
       await html(
         <>
           <div>Hello</div>
-          <Box b="1px dashed hotpink" p="8px">
-            inhalt der box
-          </Box>
+          <Stack g={space.md}>
+            <Repeat n={10}>
+              <Box b="1px dashed hotpink" p="8px">
+                inhalt der box
+              </Box>
+            </Repeat>
+          </Stack>
           <div>
             <User />
           </div>
