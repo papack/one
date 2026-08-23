@@ -21,6 +21,8 @@ app.router.listen(3000);
 ## idea
 
 - web standards
+- everything as vanilla as possible!
+- (no htmx, just js scripts)
 - testable
 - no client application
 - database is user supplied
@@ -40,17 +42,5 @@ this.app.router.add("GET", "/my-route", async () => {
 });
 ```
 
-tiny htmx-like (client)runtime:
-
-```text
-aio-post="/path"
-aio-sse="/events"
-
-aio-swap="#target"
-aio-replace="#target"
-aio-append="#target"
-```
-
-live updates use SSE and HTML fragments.
 
 that's it for now :D
