@@ -21,7 +21,7 @@ export function jsxTestPage(app: AppType) {
             <section>
               <h2>Repeat</h2>
               <Repeat n={3}>
-                <Box b="1px dashed hotpink" p="8px">
+                <Box tag="aside" b="1px dashed hotpink" p="8px">
                   Wiederholte Box
                 </Box>
               </Repeat>

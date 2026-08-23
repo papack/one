@@ -3,6 +3,8 @@ import { css } from "../css";
 
 export interface BoxProps {
   children?: any;
+  /** HTML element to render. Defaults to `div`. */
+  tag?: string;
 
   // Margin
   m?: string;
@@ -71,6 +73,7 @@ export interface BoxProps {
 
 export function Box(p: BoxProps) {
   const {
+    tag: Tag = "div",
     m,
     mb,
     ml,
@@ -159,9 +162,5 @@ export function Box(p: BoxProps) {
     ...customStyle,
   });
 
-  return (
-    <div {...attrs} style={style || undefined}>
-      {children}
-    </div>
-  );
+  return jsx(Tag, { ...attrs, style: style || undefined }, ...(Array.isArray(children) ? children : [children]));
 }
