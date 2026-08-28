@@ -1,5 +1,9 @@
 # Next Step
 
+- add bus
+- add log
+- add schema
+
 # Roadmap
 
 1. everything for ssr/html rending + auth(sessions)

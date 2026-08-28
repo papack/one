@@ -1,10 +1,10 @@
-import type { JSXRenderable } from "./jsx";
+import type { JSXElement } from "./jsx";
 
 type ShowProps = {
   when: boolean;
-  children: JSXRenderable;
+  children: JSXElement;
 };
 
-export function Show(props: ShowProps): JSXRenderable {
+export function Show(props: ShowProps): JSXElement {
   return props.when ? props.children : null;
 }

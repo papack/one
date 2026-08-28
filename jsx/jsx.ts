@@ -2,7 +2,7 @@ import { fragment } from "./fragment";
 
 declare global {
   namespace JSX {
-    type Element = JSXRenderable;
+    type Element = JSXElement;
 
     interface IntrinsicElements {
       [tagName: string]: Record<string, unknown>;
@@ -20,19 +20,13 @@ export type JSXNode = {
   children: unknown[];
 };
 
-type JSXValue =
-  | JSXNode
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+type JSXValue = JSXNode | string | number | boolean | null | undefined;
 
 type JSXSyncRenderable = JSXValue | readonly JSXSyncRenderable[];
 
-export type JSXRenderable = JSXSyncRenderable | Promise<JSXSyncRenderable>;
+export type JSXElement = JSXSyncRenderable | Promise<JSXSyncRenderable>;
 
-export type Component = (props: any) => JSXRenderable;
+export type Component = (props: any) => JSXElement;
 
 export function jsx(
   type: string | Component | typeof fragment,

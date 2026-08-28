@@ -1,13 +1,13 @@
-import type { JSXRenderable } from "./jsx";
+import type { JSXElement } from "./jsx";
 
-type ForChild<T> = (item: T) => JSXRenderable;
+type ForChild<T> = (item: T) => JSXElement;
 
 export type ForProps<T> = {
   each: readonly T[];
   children: ForChild<T> | readonly ForChild<T>[];
 };
 
-export function For<T>(props: ForProps<T>): JSXRenderable {
+export function For<T>(props: ForProps<T>): JSXElement {
   const { each, children } = props;
   if (!each || each.length === 0) return null;
 
@@ -18,5 +18,5 @@ export function For<T>(props: ForProps<T>): JSXRenderable {
     throw new Error("<For> expects a single function child");
   }
 
-  return each.map((item) => render(item)) as JSXRenderable;
+  return each.map((item) => render(item)) as JSXElement;
 }

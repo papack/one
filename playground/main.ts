@@ -1,6 +1,6 @@
-import { HelloWorld } from "./playground/hello-world";
-import { Router } from "./router";
-import { MapSessionStorage, Session } from "./session";
+import { HelloWorld } from "./hello-world";
+import { Router } from "../router";
+import { MapSessionStorage, Session } from "../session";
 export type AppType = typeof app;
 
 const app = {
