@@ -1,7 +1,5 @@
 # Next Step
 
-- sessions await session.restore(request).save()
-
 # Roadmap
 
 1. everything for ssr/html rending + auth(sessions)
