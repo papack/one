@@ -1,3 +1,5 @@
+import { CookieNotFoundError } from "./errors";
+
 export function parse(cookies: string, key: string): string {
   const encodedKey = encodeURIComponent(key);
 

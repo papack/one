@@ -1,5 +1,5 @@
 import { SessionStorageEntryNotFoundError } from "./errors";
-import { SessionStoragePortInterface } from "./session-storage-port-interface.ts";
+import { SessionStoragePortInterface } from "./session-storage-port-interface";
 
 export class MapSessionStorage<T> implements SessionStoragePortInterface<T> {
   private readonly storage = new Map<string, T>();
