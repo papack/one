@@ -24,9 +24,21 @@ export class Router {
 
   private async handleRequest(req: IncomingMessage, res: ServerResponse) {
     const url = new URL(`http://${req.headers.host}${req.url}`);
+    const headers = new Headers();
+
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (Array.isArray(value)) {
+        for (const headerValue of value) {
+          headers.append(key, headerValue);
+        }
+      } else if (value !== undefined) {
+        headers.set(key, value);
+      }
+    }
 
     const request = new Request(url, {
       method: req.method,
+      headers,
     });
 
     try {

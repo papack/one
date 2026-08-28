@@ -11,11 +11,18 @@ export class HelloWorld {
 
   public async init() {
     this.app.router.add("GET", "/", async (req) => {
-      const sess = this.app.session.restore(req);
+      const sess = await this.app.session.restore(req);
       sess.values;
 
+      if (sess.isNew) {
+        await this.app.session.save(sess);
+      }
+
       return new Response(await html(<div>Hello World!</div>), {
-        headers: { "content-type": "text/html" },
+        headers: {
+          "content-type": "text/html",
+          "set-cookie": sess.cookie,
+        },
       });
     });
   }

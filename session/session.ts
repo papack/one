@@ -4,9 +4,9 @@ import { type SessionStoragePortInterface } from "./session-storage";
 
 export interface SessionState<T> {
   readonly id: string;
-  readonly values: T;
   readonly cookie: string;
   readonly isNew: boolean;
+  values: T;
 }
 
 export interface SessionCookieOptions {
@@ -39,31 +39,38 @@ export class Session<T> {
     this.cookieOptions = cookieOptions;
   }
 
-  restore(request: Request): SessionState<T> {
+  async restore(request: Request): Promise<SessionState<T>> {
     const cookies = request.headers.get("cookie");
 
     if (cookies) {
-      try {
-        const id = cookie.parse(cookies, this.cookieName);
+      let id: string;
 
-        if (this.sessionStorage.has(id)) {
-          return {
-            id,
-            values: this.sessionStorage.get(id),
-            cookie: cookie.stringify(this.cookieName, id, this.cookieOptions),
-            isNew: false,
-          };
-        }
+      try {
+        id = cookie.parse(cookies, this.cookieName);
       } catch {
         // Cookie not found.
+        return this.create();
+      }
+
+      if (await this.sessionStorage.has(id)) {
+        return {
+          id,
+          values: await this.sessionStorage.get(id),
+          cookie: cookie.stringify(this.cookieName, id, this.cookieOptions),
+          isNew: false,
+        };
       }
     }
 
     return this.create();
   }
 
-  destroy(session: SessionState<T>): string {
-    this.sessionStorage.delete(session.id);
+  async save(session: SessionState<T>): Promise<void> {
+    await this.sessionStorage.set(session.id, session.values);
+  }
+
+  async destroy(session: SessionState<T>): Promise<string> {
+    await this.sessionStorage.delete(session.id);
 
     return cookie.stringify(this.cookieName, "", {
       ...this.cookieOptions,
@@ -75,8 +82,6 @@ export class Session<T> {
   private create(): SessionState<T> {
     const id = crypto.generate.string(128);
     const values = this.createValues();
-
-    this.sessionStorage.set(id, values);
 
     return {
       id,
