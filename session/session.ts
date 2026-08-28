@@ -7,6 +7,7 @@ export interface SessionState<T> {
   readonly cookie: string;
   readonly isNew: boolean;
   values: T;
+  readonly save: () => Promise<void>;
 }
 
 export interface SessionCookieOptions {
@@ -53,20 +54,15 @@ export class Session<T> {
       }
 
       if (await this.sessionStorage.has(id)) {
-        return {
+        return this.createState({
           id,
           values: await this.sessionStorage.get(id),
-          cookie: cookie.stringify(this.cookieName, id, this.cookieOptions),
           isNew: false,
-        };
+        });
       }
     }
 
     return this.create();
-  }
-
-  async save(session: SessionState<T>): Promise<void> {
-    await this.sessionStorage.set(session.id, session.values);
   }
 
   async destroy(session: SessionState<T>): Promise<string> {
@@ -83,11 +79,26 @@ export class Session<T> {
     const id = crypto.generate.string(128);
     const values = this.createValues();
 
-    return {
-      id,
-      values,
-      cookie: cookie.stringify(this.cookieName, id, this.cookieOptions),
-      isNew: true,
+    return this.createState({ id, values, isNew: true });
+  }
+
+  private createState(p: {
+    id: string;
+    values: T;
+    isNew: boolean;
+  }): SessionState<T> {
+    let session: SessionState<T>;
+
+    session = {
+      id: p.id,
+      values: p.values,
+      cookie: cookie.stringify(this.cookieName, p.id, this.cookieOptions),
+      isNew: p.isNew,
+      save: async () => {
+        await this.sessionStorage.set(session.id, session.values);
+      },
     };
+
+    return session;
   }
 }

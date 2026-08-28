@@ -10,8 +10,10 @@ const app = {
       new Response("INTERNAL_SERVER_ERROR", { status: 500 }),
   }),
   session: new Session({
-    sessionStorage: new MapSessionStorage<string>(),
-    createValues: () => "",
+    sessionStorage: new MapSessionStorage<{ count: number }>(),
+    createValues: () => ({
+      count: 0,
+    }),
     cookie: {},
   }),
 };

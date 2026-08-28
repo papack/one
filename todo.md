@@ -1,6 +1,6 @@
 # Next Step
 
-- sessions await session.save()
+- sessions await session.restore(request).save()
 
 # Roadmap
 

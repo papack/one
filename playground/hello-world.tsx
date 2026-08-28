@@ -12,18 +12,22 @@ export class HelloWorld {
   public async init() {
     this.app.router.add("GET", "/", async (req) => {
       const sess = await this.app.session.restore(req);
-      sess.values;
+      sess.values.count++;
+      await sess.save();
 
-      if (sess.isNew) {
-        await this.app.session.save(sess);
-      }
-
-      return new Response(await html(<div>Hello World!</div>), {
-        headers: {
-          "content-type": "text/html",
-          "set-cookie": sess.cookie,
+      return new Response(
+        await html(
+          <div>
+            Hello World! {sess.values.count} ({sess.id})
+          </div>,
+        ),
+        {
+          headers: {
+            "content-type": "text/html",
+            "set-cookie": sess.cookie,
+          },
         },
-      });
+      );
     });
   }
 }
