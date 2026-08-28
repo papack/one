@@ -10,7 +10,10 @@ export class HelloWorld {
   }
 
   public async init() {
-    this.app.router.add("GET", "/", async () => {
+    this.app.router.add("GET", "/", async (req) => {
+      const sess = this.app.session.restore(req);
+      sess.values;
+
       return new Response(await html(<div>Hello World!</div>), {
         headers: { "content-type": "text/html" },
       });
