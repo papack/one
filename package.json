@@ -21,7 +21,7 @@
     "fmt": "prettier --write .",
     "lint": "oxlint",
     "check": "tsc --noEmit",
-    "build": "tsdown"
+    "build": "tsdown --concurrency 1"
   },
   "keywords": [],
   "devDependencies": {
