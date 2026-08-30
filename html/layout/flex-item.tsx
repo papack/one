@@ -12,7 +12,16 @@ export interface FlexItemPropertiesInterface extends BoxProps {
 }
 
 export function FlexItem(p: FlexItemPropertiesInterface) {
-  const { flx, as, flxGrow, flxShrink, flxBasis, style: customStyle, children, ...attrs } = p;
+  const {
+    flx,
+    as,
+    flxGrow,
+    flxShrink,
+    flxBasis,
+    style: customStyle,
+    children,
+    ...attrs
+  } = p;
 
   return (
     <Box

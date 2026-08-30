@@ -8,5 +8,9 @@ export interface StackPropertiesInterface extends FlexPropertiesInterface {}
 export function Stack(p: StackPropertiesInterface) {
   const { children, ...attrs } = p;
 
-  return <Flex {...attrs} flxDirection={p.flxDirection ?? "column"}>{children}</Flex>;
+  return (
+    <Flex {...attrs} flxDirection={p.flxDirection ?? "column"}>
+      {children}
+    </Flex>
+  );
 }

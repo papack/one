@@ -11,4 +11,4 @@ export const space = {
   "6xl": "3.5rem", // 6 Extra Large (56px)
   "7xl": "4rem", // 7 Extra Large (64px)
   "8xl": "4.5rem", // 8 Extra Large (72px)
-}
+};

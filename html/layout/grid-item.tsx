@@ -10,7 +10,26 @@ export interface GridItemPropertiesInterface extends BoxProps {
 }
 
 export function GridItem(p: GridItemPropertiesInterface) {
-  const { grdArea, grdColumn, grdRow, style: customStyle, children, ...attrs } = p;
+  const {
+    grdArea,
+    grdColumn,
+    grdRow,
+    style: customStyle,
+    children,
+    ...attrs
+  } = p;
 
-  return <Box {...attrs} style={{ gridArea: grdArea, gridColumn: grdColumn, gridRow: grdRow, ...customStyle }}>{children}</Box>;
+  return (
+    <Box
+      {...attrs}
+      style={{
+        gridArea: grdArea,
+        gridColumn: grdColumn,
+        gridRow: grdRow,
+        ...customStyle,
+      }}
+    >
+      {children}
+    </Box>
+  );
 }

@@ -8,5 +8,9 @@ export interface CenterPropertiesInterface extends FlexPropertiesInterface {}
 export function Center(p: CenterPropertiesInterface) {
   const { children, ...attrs } = p;
 
-  return <Flex {...attrs} ai={p.ai ?? "center"} jc={p.jc ?? "center"}>{children}</Flex>;
+  return (
+    <Flex {...attrs} ai={p.ai ?? "center"} jc={p.jc ?? "center"}>
+      {children}
+    </Flex>
+  );
 }

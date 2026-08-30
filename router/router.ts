@@ -78,8 +78,7 @@ export class Router {
 
     try {
       const handler =
-        this.routes.get(`${method} ${url.pathname}`) ??
-        this.notFoundHandler;
+        this.routes.get(`${method} ${url.pathname}`) ?? this.notFoundHandler;
 
       const response = await handler(request);
 

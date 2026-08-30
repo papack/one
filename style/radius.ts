@@ -6,4 +6,4 @@ export const radius = {
   "2xl": "1rem", // 16px
   "3xl": "1.5rem", // 24px
   full: "9999px", // full circle
-}
+};

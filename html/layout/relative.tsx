@@ -10,5 +10,9 @@ export interface RelativePropertiesInterface extends BoxProps {
 export function Relative(p: RelativePropertiesInterface) {
   const { zIndex, style: customStyle, children, ...attrs } = p;
 
-  return <Box {...attrs} style={{ position: "relative", zIndex, ...customStyle }}>{children}</Box>;
+  return (
+    <Box {...attrs} style={{ position: "relative", zIndex, ...customStyle }}>
+      {children}
+    </Box>
+  );
 }

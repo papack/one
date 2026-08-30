@@ -98,5 +98,9 @@ export function Text(p: TextPropertiesInterface) {
     ...customStyle,
   });
 
-  return jsx(Tag, { ...attrs, style: style || undefined }, ...(Array.isArray(children) ? children : [children]));
+  return jsx(
+    Tag,
+    { ...attrs, style: style || undefined },
+    ...(Array.isArray(children) ? children : [children]),
+  );
 }

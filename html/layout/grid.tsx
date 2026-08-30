@@ -7,7 +7,19 @@ export interface GridPropertiesInterface extends GridItemPropertiesInterface {
   g?: string;
   ai?: "stretch" | "start" | "end" | "center" | "baseline";
   ji?: "stretch" | "start" | "end" | "center" | "baseline";
-  as?: "auto" | "normal" | "stretch" | "center" | "start" | "end" | "self-start" | "self-end" | "flex-start" | "flex-end" | "left" | "right";
+  as?:
+    | "auto"
+    | "normal"
+    | "stretch"
+    | "center"
+    | "start"
+    | "end"
+    | "self-start"
+    | "self-end"
+    | "flex-start"
+    | "flex-end"
+    | "left"
+    | "right";
   grdTemplateColumns?: string;
   grdTemplateRows?: string;
   grdTemplateAreas?: string;
@@ -26,22 +38,53 @@ export interface GridPropertiesInterface extends GridItemPropertiesInterface {
 
 export function Grid(p: GridPropertiesInterface) {
   const {
-    g, ai, ji, as, grdTemplateColumns, grdTemplateRows, grdTemplateAreas, grdTemplate,
-    grdAutoColumns, grdAutoRows, grdAutoFlow, grd, grdRowStart, grdColumnStart,
-    grdRowEnd, grdColumnEnd, grdRowGap, grdColumnGap, style: customStyle, children, ...attrs
+    g,
+    ai,
+    ji,
+    as,
+    grdTemplateColumns,
+    grdTemplateRows,
+    grdTemplateAreas,
+    grdTemplate,
+    grdAutoColumns,
+    grdAutoRows,
+    grdAutoFlow,
+    grd,
+    grdRowStart,
+    grdColumnStart,
+    grdRowEnd,
+    grdColumnEnd,
+    grdRowGap,
+    grdColumnGap,
+    style: customStyle,
+    children,
+    ...attrs
   } = p;
 
   return (
     <GridItem
       {...attrs}
       style={{
-        display: "grid", gap: g, alignItems: ai, justifyItems: ji, alignSelf: as,
-        gridTemplateColumns: grdTemplateColumns, gridTemplateRows: grdTemplateRows,
-        gridTemplateAreas: grdTemplateAreas, gridTemplate: grdTemplate,
-        gridAutoColumns: grdAutoColumns, gridAutoRows: grdAutoRows, gridAutoFlow: grdAutoFlow,
-        gridArea: grd, gridRowStart: grdRowStart, gridColumnStart: grdColumnStart,
-        gridRowEnd: grdRowEnd, gridColumnEnd: grdColumnEnd,
-        rowGap: grdRowGap, columnGap: grdColumnGap, ...customStyle,
+        display: "grid",
+        gap: g,
+        alignItems: ai,
+        justifyItems: ji,
+        alignSelf: as,
+        gridTemplateColumns: grdTemplateColumns,
+        gridTemplateRows: grdTemplateRows,
+        gridTemplateAreas: grdTemplateAreas,
+        gridTemplate: grdTemplate,
+        gridAutoColumns: grdAutoColumns,
+        gridAutoRows: grdAutoRows,
+        gridAutoFlow: grdAutoFlow,
+        gridArea: grd,
+        gridRowStart: grdRowStart,
+        gridColumnStart: grdColumnStart,
+        gridRowEnd: grdRowEnd,
+        gridColumnEnd: grdColumnEnd,
+        rowGap: grdRowGap,
+        columnGap: grdColumnGap,
+        ...customStyle,
       }}
     >
       {children}

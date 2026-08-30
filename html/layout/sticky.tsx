@@ -12,12 +12,29 @@ export interface StickyPropertiesInterface extends BoxProps {
 }
 
 export function Sticky(p: StickyPropertiesInterface) {
-  const { top, right, bottom, left, zIndex, style: customStyle, children, ...attrs } = p;
+  const {
+    top,
+    right,
+    bottom,
+    left,
+    zIndex,
+    style: customStyle,
+    children,
+    ...attrs
+  } = p;
 
   return (
     <Box
       {...attrs}
-      style={{ position: "sticky", top, right, bottom, left, zIndex, ...customStyle }}
+      style={{
+        position: "sticky",
+        top,
+        right,
+        bottom,
+        left,
+        zIndex,
+        ...customStyle,
+      }}
     >
       {children}
     </Box>

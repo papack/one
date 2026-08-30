@@ -1,16 +1,35 @@
 {
   "name": "@papack/one",
-  "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "an all in one SSR Framework",
+  "version": "0.1.0",
+  "author": "Matthias Steiner",
+  "license": "MIT",
+  "repository": "github:papack/one",
+  "homepage": "https://github.com/papack/one",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "module": "dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "type": "module",
+  "types": "./dist/index.d.mts",
   "scripts": {
-    "dev": "tsx main.ts"
+    "dev": "tsx main.ts",
+    "fmt": "prettier --write .",
+    "lint": "oxlint",
+    "check": "tsc --noEmit",
+    "build": "tsdown"
   },
   "keywords": [],
-  "type": "module",
   "devDependencies": {
     "@types/node": "^26.2.0",
-    "esbuild": "^0.28.2",
-    "tsx": "^4.23.12"
+    "oxlint": "^1.80.0",
+    "prettier": "^3.9.6",
+    "tsdown": "^0.22.14",
+    "tsx": "^4.23.12",
+    "typescript": "^6.0.3"
   }
 }

@@ -11,7 +11,15 @@ export interface AbsolutePropertiesInterface extends BoxProps {
 }
 
 export function Absolute(p: AbsolutePropertiesInterface) {
-  const { top, right, bottom, left, style: customStyle, children, ...attrs } = p;
+  const {
+    top,
+    right,
+    bottom,
+    left,
+    style: customStyle,
+    children,
+    ...attrs
+  } = p;
 
   return (
     <Box

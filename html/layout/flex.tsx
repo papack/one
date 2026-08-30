@@ -4,9 +4,21 @@ import type { FlexItemPropertiesInterface } from "./flex-item";
 
 /** Core flexbox layout primitive. */
 export interface FlexPropertiesInterface extends FlexItemPropertiesInterface {
-  jc?: "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "space-evenly";
+  jc?:
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
   ai?: "stretch" | "flex-start" | "flex-end" | "center" | "baseline";
-  ac?: "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "stretch";
+  ac?:
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "stretch";
   g?: string;
   flxDirection?: "row" | "row-reverse" | "column" | "column-reverse";
   flxWrap?: "nowrap" | "wrap" | "wrap-reverse";
@@ -14,7 +26,18 @@ export interface FlexPropertiesInterface extends FlexItemPropertiesInterface {
 }
 
 export function Flex(p: FlexPropertiesInterface) {
-  const { jc, ai, ac, g, flxDirection, flxWrap, flxFlow, style: customStyle, children, ...attrs } = p;
+  const {
+    jc,
+    ai,
+    ac,
+    g,
+    flxDirection,
+    flxWrap,
+    flxFlow,
+    style: customStyle,
+    children,
+    ...attrs
+  } = p;
 
   return (
     <FlexItem

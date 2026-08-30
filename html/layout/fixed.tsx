@@ -12,12 +12,29 @@ export interface FixedPropertiesInterface extends BoxProps {
 }
 
 export function Fixed(p: FixedPropertiesInterface) {
-  const { top, right, bottom, left, zIndex, style: customStyle, children, ...attrs } = p;
+  const {
+    top,
+    right,
+    bottom,
+    left,
+    zIndex,
+    style: customStyle,
+    children,
+    ...attrs
+  } = p;
 
   return (
     <Box
       {...attrs}
-      style={{ position: "fixed", top, right, bottom, left, zIndex, ...customStyle }}
+      style={{
+        position: "fixed",
+        top,
+        right,
+        bottom,
+        left,
+        zIndex,
+        ...customStyle,
+      }}
     >
       {children}
     </Box>
