@@ -3,6 +3,7 @@ export * from "./crypto";
 export * from "./html";
 export * from "./jsx";
 export * from "./router";
+export * from "./schema";
 export * from "./session";
 export * from "./storage";
 export * from "./style";

@@ -11,6 +11,7 @@
 - Server-side HTML and JSX rendering, including async components
 - Lightweight layout, style and design-token utilities
 - Swappable object storage for Buffers and Node.js streams
+- Synchronous, typed schemas for validating request and application data
 
 ## Install
 
@@ -100,6 +101,26 @@ const storage = new FileStorage({
 
 const id = await storage.write(Buffer.from("Hello object storage"));
 const object = await storage.read(id); // Buffer
+```
+
+## Schemas
+
+Schemas validate synchronously and throw a `ValidationError` at the first
+invalid value. Use `Infer` to derive the corresponding TypeScript type.
+
+```ts
+import { type Infer, isMail, isString, object, value } from "@papack/one";
+
+const userSchema = object({
+  name: value(isString),
+  email: value(isMail),
+});
+
+type User = Infer<typeof userSchema>;
+const user: User = userSchema.validate({
+  name: "Ada",
+  email: "ada@example.com",
+});
 ```
 
 ## Status
