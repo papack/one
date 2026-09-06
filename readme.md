@@ -10,6 +10,7 @@
 - Node HTTP server with the familiar `Request` / `Response` API
 - Server-side HTML and JSX rendering, including async components
 - Lightweight layout, style and design-token utilities
+- Swappable object storage for Buffers and Node.js streams
 
 ## Install
 
@@ -82,6 +83,23 @@ const session = new Session({
   createValues: () => ({ visits: 0 }),
   cookie: { name: "session", sameSite: "lax" },
 });
+```
+
+## Object storage
+
+`FileStorage` stores objects under generated UUIDs; `MemoryStorage` is useful for
+tests or ephemeral data. Both support `write`, `read`, `exists`, and `delete`.
+
+```ts
+import { FileStorage } from "@papack/one";
+
+const storage = new FileStorage({
+  basePath: "./data/objects",
+  maxFileSizeInMegaByte: 10,
+});
+
+const id = await storage.write(Buffer.from("Hello object storage"));
+const object = await storage.read(id); // Buffer
 ```
 
 ## Status
