@@ -1,5 +1,4 @@
-import { jsx } from "../../jsx";
-import { css } from "../css";
+import { jsx } from "../jsx";
 
 /** Typographic primitive for rendering text elements. */
 export interface TextPropertiesInterface {
@@ -74,7 +73,7 @@ export function Text(p: TextPropertiesInterface) {
     ...attrs
   } = p;
 
-  const style = css({
+  const style = {
     textAlign: a,
     fontFamily: ff,
     fontWeight: fw,
@@ -96,11 +95,11 @@ export function Text(p: TextPropertiesInterface) {
 
     background: bg,
     ...customStyle,
-  });
+  };
 
   return jsx(
     Tag,
-    { ...attrs, style: style || undefined },
+    { ...attrs, style },
     ...(Array.isArray(children) ? children : [children]),
   );
 }

@@ -1,4 +1,4 @@
-import { jsx } from "../../jsx";
+import { jsx } from "../jsx";
 import { FlexItem } from "./flex-item";
 import type { FlexItemPropertiesInterface } from "./flex-item";
 

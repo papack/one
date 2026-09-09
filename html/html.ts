@@ -53,6 +53,11 @@ function renderAttributes(props: Record<string, unknown>): string {
     .filter(([key]) => key !== "children")
     .filter(([, value]) => value != null && value !== false)
     .map(([key, value]) => {
+      if (key === "style") {
+        const style = renderStyle(value);
+        return style ? ` style="${escapeHtml(style)}"` : "";
+      }
+
       // disabled={true} -> disabled
       if (value === true) {
         return ` ${key}`;
@@ -61,6 +66,23 @@ function renderAttributes(props: Record<string, unknown>): string {
       return ` ${key}="${escapeHtml(String(value))}"`;
     })
     .join("");
+}
+
+function renderStyle(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+
+  return Object.entries(value as Record<string, unknown>)
+    .filter(([, styleValue]) => styleValue != null)
+    .map(
+      ([property, styleValue]) =>
+        `${kebabCase(property)}:${String(styleValue)}`,
+    )
+    .join(";");
+}
+
+function kebabCase(value: string): string {
+  return value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 }
 
 function escapeHtml(value: string): string {

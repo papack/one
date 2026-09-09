@@ -1,4 +1,4 @@
-import { jsx } from "../../jsx";
+import { jsx } from "../jsx";
 import { Box } from "./box";
 import type { BoxProps } from "./box";
 

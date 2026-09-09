@@ -1,9 +1,9 @@
-import { jsx } from "../../jsx";
+import { jsx } from "../jsx";
 import { Box } from "./box";
 import type { BoxProps } from "./box";
 
-/** Sticks an element within its scroll container. */
-export interface StickyPropertiesInterface extends BoxProps {
+/** Positions an element relative to the viewport. */
+export interface FixedPropertiesInterface extends BoxProps {
   top?: string;
   right?: string;
   bottom?: string;
@@ -11,7 +11,7 @@ export interface StickyPropertiesInterface extends BoxProps {
   zIndex?: string;
 }
 
-export function Sticky(p: StickyPropertiesInterface) {
+export function Fixed(p: FixedPropertiesInterface) {
   const {
     top,
     right,
@@ -27,7 +27,7 @@ export function Sticky(p: StickyPropertiesInterface) {
     <Box
       {...attrs}
       style={{
-        position: "sticky",
+        position: "fixed",
         top,
         right,
         bottom,

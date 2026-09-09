@@ -1,4 +1,4 @@
-import { jsx } from "../../jsx";
+import { jsx } from "../jsx";
 import { GridItem } from "./grid-item";
 import type { GridItemPropertiesInterface } from "./grid-item";
 

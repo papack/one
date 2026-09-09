@@ -1,5 +1,4 @@
-import { jsx } from "../../jsx";
-import { css } from "../css";
+import { jsx } from "../jsx";
 
 export interface BoxProps {
   children?: any;
@@ -126,7 +125,7 @@ export function Box(p: BoxProps) {
     ...attrs
   } = p;
 
-  const style = css({
+  const style = {
     marginBottom: mb ?? my ?? m,
     marginLeft: ml ?? mx ?? m,
     marginRight: mr ?? mx ?? m,
@@ -160,11 +159,11 @@ export function Box(p: BoxProps) {
     minHeight: minH,
 
     ...customStyle,
-  });
+  };
 
   return jsx(
     Tag,
-    { ...attrs, style: style || undefined },
+    { ...attrs, style },
     ...(Array.isArray(children) ? children : [children]),
   );
 }
