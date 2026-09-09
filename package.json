@@ -26,21 +26,6 @@
       "types": "./dist/dom/index.d.mts",
       "import": "./dist/dom/index.mjs",
       "require": "./dist/dom/index.cjs"
-    },
-    "./jsx": {
-      "types": "./dist/jsx/index.d.mts",
-      "import": "./dist/jsx/index.mjs",
-      "require": "./dist/jsx/index.cjs"
-    },
-    "./layout": {
-      "types": "./dist/layout/index.d.mts",
-      "import": "./dist/layout/index.mjs",
-      "require": "./dist/layout/index.cjs"
-    },
-    "./ui": {
-      "types": "./dist/ui/index.d.mts",
-      "import": "./dist/ui/index.mjs",
-      "require": "./dist/ui/index.cjs"
     }
   },
   "scripts": {
