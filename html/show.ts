@@ -1,4 +1,4 @@
-import type { JSXElement } from "./jsx";
+import type { JSXElement } from "../jsx/jsx";
 
 type ShowProps = {
   when: boolean;

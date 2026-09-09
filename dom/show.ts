@@ -6,16 +6,19 @@ import { dom, type DomContext } from "./dom";
 
 export interface ShowProps {
   when: ReadFn<boolean>;
-  children?: unknown[];
+  /** JSX supplies children individually during type checking. */
+  children?: unknown;
 }
 
 /** Mounts and destroys its children as the signal changes. */
-export function Show({ when, children = [] }: ShowProps): null {
+export function Show({ when, children }: ShowProps): null {
+  const childNodes =
+    children == null ? [] : Array.isArray(children) ? children : [children];
   const host = jsx("dom-show", { style: { display: "contents" } });
   const content = jsx(
     "dom-show-content",
     { style: { display: "contents" } },
-    ...children,
+    ...childNodes,
   );
 
   mount((parent) => {

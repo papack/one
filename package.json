@@ -1,7 +1,7 @@
 {
   "name": "@papack/one",
   "description": "an all in one SSR Framework",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "author": "Matthias Steiner",
   "license": "MIT",
   "repository": "github:papack/one",
@@ -22,10 +22,25 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./html": {
+      "types": "./dist/html/index.d.mts",
+      "import": "./dist/html/index.mjs",
+      "require": "./dist/html/index.cjs"
+    },
     "./dom": {
       "types": "./dist/dom/index.d.mts",
       "import": "./dist/dom/index.mjs",
       "require": "./dist/dom/index.cjs"
+    },
+    "./jsx": {
+      "types": "./dist/jsx/index.d.mts",
+      "import": "./dist/jsx/index.mjs",
+      "require": "./dist/jsx/index.cjs"
+    },
+    "./layout": {
+      "types": "./dist/layout/index.d.mts",
+      "import": "./dist/layout/index.mjs",
+      "require": "./dist/layout/index.cjs"
     }
   },
   "scripts": {
