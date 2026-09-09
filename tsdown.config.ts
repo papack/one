@@ -4,6 +4,7 @@ export default defineConfig({
   entry: [
     "./index.ts",
     "./html/index.ts",
+    "./style/index.ts",
     "./dom/index.ts",
     "./jsx/index.ts",
     "./layout/index.ts",
