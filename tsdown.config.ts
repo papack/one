@@ -5,6 +5,7 @@ export default defineConfig({
     "./index.ts",
     "./html/index.ts",
     "./style/index.ts",
+    "./schema/index.ts",
     "./dom/index.ts",
     "./jsx/index.ts",
     "./layout/index.ts",

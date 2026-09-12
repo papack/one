@@ -1,6 +1,15 @@
-export type SwapMode = "inner" | "outer" | "append" | "prepend" | "before" | "after" | "remove";
+export type SwapMode =
+  "inner" | "outer" | "append" | "prepend" | "before" | "after" | "remove";
 
-const swapModes = new Set<SwapMode>(["inner", "outer", "append", "prepend", "before", "after", "remove"]);
+const swapModes = new Set<SwapMode>([
+  "inner",
+  "outer",
+  "append",
+  "prepend",
+  "before",
+  "after",
+  "remove",
+]);
 
 export function targetFor(source: Element): Element | null {
   const targetId = source.getAttribute("data-target");
@@ -26,11 +35,21 @@ export function swap(source: Element, html: string): boolean {
   }
   const fragment = document.createRange().createContextualFragment(html);
   switch (mode) {
-    case "outer": target.replaceWith(fragment); break;
-    case "append": target.append(fragment); break;
-    case "prepend": target.prepend(fragment); break;
-    case "before": target.before(fragment); break;
-    case "after": target.after(fragment); break;
+    case "outer":
+      target.replaceWith(fragment);
+      break;
+    case "append":
+      target.append(fragment);
+      break;
+    case "prepend":
+      target.prepend(fragment);
+      break;
+    case "before":
+      target.before(fragment);
+      break;
+    case "after":
+      target.after(fragment);
+      break;
   }
   return true;
 }

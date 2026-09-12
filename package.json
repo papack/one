@@ -37,6 +37,11 @@
       "import": "./dist/dom/index.mjs",
       "require": "./dist/dom/index.cjs"
     },
+    "./schema": {
+      "types": "./dist/schema/index.d.mts",
+      "import": "./dist/schema/index.mjs",
+      "require": "./dist/schema/index.cjs"
+    },
     "./jsx": {
       "types": "./dist/jsx/index.d.mts",
       "import": "./dist/jsx/index.mjs",

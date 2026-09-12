@@ -1,6 +1,9 @@
 import { swap } from "./swap";
 
-export async function handleResponse(source: Element, response: Response): Promise<void> {
+export async function handleResponse(
+  source: Element,
+  response: Response,
+): Promise<void> {
   const location = response.headers.get("runtime-location");
   if (location) {
     window.location.assign(location);
