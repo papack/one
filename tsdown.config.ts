@@ -8,6 +8,7 @@ export default defineConfig({
     "./dom/index.ts",
     "./jsx/index.ts",
     "./layout/index.ts",
+    "./runtime/index.ts",
   ],
   format: ["esm", "cjs"],
   outDir: "dist",

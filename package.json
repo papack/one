@@ -46,6 +46,11 @@
       "types": "./dist/layout/index.d.mts",
       "import": "./dist/layout/index.mjs",
       "require": "./dist/layout/index.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.mts",
+      "import": "./dist/runtime/index.mjs",
+      "require": "./dist/runtime/index.cjs"
     }
   },
   "scripts": {
