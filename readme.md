@@ -1,14 +1,16 @@
 # @papack/one
 
-**A small, server-first TypeScript toolkit for rendering HTML with web standards.**
+**A small, server-first TypeScript toolkit for rendering HTML and optional CSR islands with web standards.**
 
 `@papack/one` keeps the application on the server: routes receive a standard
-`Request`, return a standard `Response`, and render HTML directly.
+`Request`, return a standard `Response`, and render HTML directly. Browser-only
+DOM islands are available through the separate `@papack/one/dom` entry point.
 
 ## Highlights
 
 - Node HTTP server with the familiar `Request` / `Response` API
 - Server-side HTML and JSX rendering, including async components
+- Lightweight client-side DOM renderer with signals, lifecycle hooks, and helpers
 - Lightweight layout, style and design-token utilities
 - Swappable object storage for Buffers and Node.js streams
 - Synchronous, typed schemas for validating request and application data
@@ -24,7 +26,9 @@ npm install @papack/one
 You define the application object yourself. Features receive it in `init`, so they can register routes and use the services your application chooses to provide.
 
 ```tsx
-import { html, jsx, Router } from "@papack/one";
+import { Router } from "@papack/one";
+import { html } from "@papack/one/html";
+import { jsx } from "@papack/one/jsx";
 
 const app = {
   router: new Router({
@@ -71,6 +75,40 @@ For JSX, configure TypeScript to use the package factory:
   }
 }
 ```
+
+## DOM islands
+
+`@papack/one/dom` is a browser-only renderer for interactive CSR islands. Keep
+it out of server-side route modules; import the JSX factory from
+`@papack/one/jsx` in modules that contain JSX.
+
+```tsx
+import { jsx } from "@papack/one/jsx";
+import { dom, signal, Show } from "@papack/one/dom";
+
+const [visible, setVisible] = signal(true);
+
+function Counter() {
+  return (
+    <section>
+      <button onClick={() => void setVisible((value) => !value)}>
+        Toggle message
+      </button>
+      <Show when={visible}>
+        <p>This part is mounted and destroyed reactively.</p>
+      </Show>
+    </section>
+  );
+}
+
+const root = document.querySelector<HTMLElement>("#app");
+if (!root) throw new Error("Missing #app element");
+
+dom(<Counter />, { parent: root });
+```
+
+The DOM entry point also exports `For`, `Repeat`, `Portal`, lifecycle helpers,
+and browser hooks such as `useLocalStorage`, `useNavigate`, and `useUrlParam`.
 
 ## Sessions
 

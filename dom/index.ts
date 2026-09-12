@@ -2,6 +2,8 @@ export * from "./destroy";
 export * from "./dom";
 export * from "./effect";
 export * from "./for";
+export * from "./helper";
+export * from "./hooks";
 export * from "./lifecycle";
 export * from "./show";
 export * from "./signal";

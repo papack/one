@@ -49,7 +49,7 @@
     }
   },
   "scripts": {
-    "dev": "tsx main.ts",
+    "dev": "tsx main.tsx",
     "fmt": "prettier --write .",
     "lint": "oxlint",
     "check": "tsc --noEmit",
@@ -58,6 +58,7 @@
   "keywords": [],
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "esbuild": "^0.28.2",
     "oxlint": "^1.80.0",
     "prettier": "^3.9.6",
     "tsdown": "^0.22.14",
