@@ -27,6 +27,11 @@
       "import": "./dist/style/index.mjs",
       "require": "./dist/style/index.cjs"
     },
+    "./headers": {
+      "types": "./dist/headers/index.d.mts",
+      "import": "./dist/headers/index.mjs",
+      "require": "./dist/headers/index.cjs"
+    },
     "./html": {
       "types": "./dist/html/index.d.mts",
       "import": "./dist/html/index.mjs",
@@ -59,7 +64,6 @@
     }
   },
   "scripts": {
-    "dev": "tsx main.tsx",
     "fmt": "prettier --write .",
     "lint": "oxlint",
     "check": "tsc --noEmit",

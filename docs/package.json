@@ -1,0 +1,12 @@
+{
+  "name": "@papack/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch main.tsx",
+    "start": "tsx main.tsx"
+  },
+  "dependencies": {
+    "@papack/one": "file:.."
+  }
+}
