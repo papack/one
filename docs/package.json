@@ -8,5 +8,8 @@
   },
   "dependencies": {
     "@papack/one": "file:.."
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

@@ -10,7 +10,8 @@ export function BaseTemplate(p: BaseTemplatePropsInterface) {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <style>{`* {padding:0; margin:0;box-sizing:borderbox;}`}</style>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="stylesheet" href="/style.css" />
         <title>@papack/one - {p.title}</title>
       </head>
       <body>{p.children}</body>
