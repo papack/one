@@ -8,16 +8,17 @@ import { BaseTemplate } from "../../templates/base/base-template";
 export function HomePage() {
   return (
     <BaseTemplate title="Homepage">
-      <Center h="100dvh">
-        <Stack g={space.xxl}>
-          <Box p={space["3xl"]} class="logo-spin">
-            <Logo width="512px" height="512px" />
+      <Center minH="100svh" class="home-page">
+        <Stack g={space.xxl} class="home-page__content">
+          <Box class="home-page__logo logo-spin">
+            <Logo />
           </Box>
           <Text
             fs={font.size["5xl"]}
             ff={font.family.sans}
             a="center"
             c={color.brand}
+            class="home-page__title"
           >
             @papack/one
           </Text>

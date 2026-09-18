@@ -8,6 +8,50 @@
   animation: logo-spin 12s linear infinite;
 }
 
+.home-page {
+  min-height: 100dvh;
+  padding: 1.5rem;
+}
+
+.home-page__content {
+  align-items: center;
+  max-width: 100%;
+}
+
+.home-page__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(512px, calc(100vw - 3rem), calc(100svh - 8rem));
+  max-width: 100%;
+}
+
+.home-page__logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.home-page__title {
+  font-size: clamp(2rem, 11vw, 3rem) !important;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .home-page {
+    padding: 1rem;
+  }
+
+  .home-page__content {
+    gap: 1rem !important;
+  }
+
+  .home-page__logo {
+    width: min(512px, calc(100vw - 2rem), calc(100svh - 6rem));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .logo-spin {
     animation: none;
