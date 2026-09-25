@@ -142,6 +142,25 @@ const id = await storage.write(Buffer.from("Hello object storage"));
 const object = await storage.read(id); // Buffer
 ```
 
+## Event bus
+
+`Bus` broadcasts events with `emit(topic, data): Promise<void>`. Listeners start
+concurrently; await emit to wait for all of them and their error reporting.
+Synchronous throws and returned promise rejections go to an optional error handler
+and do not reject emit.
+
+```ts
+import { Bus } from "@papack/one/bus";
+
+const bus = new Bus<{ "user:created": { id: string } }>();
+const id = bus.on("user:created", (user) => console.log(user.id));
+await bus.emit("user:created", { id: "123" });
+bus.off(id);
+```
+
+See [Bus delivery semantics and risks](./bus/readme.md). Events are in memory;
+there is no persistence, retry, or concurrency limit.
+
 ## SMTP mail
 
 Use `Smtp` from `@papack/one/smtp` to send mail with Node's built-in TCP/TLS

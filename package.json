@@ -17,6 +17,11 @@
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
+    "./bus": {
+      "types": "./dist/bus/index.d.mts",
+      "import": "./dist/bus/index.mjs",
+      "require": "./dist/bus/index.cjs"
+    },
     "./smtp": {
       "types": "./dist/smtp/index.d.mts",
       "import": "./dist/smtp/index.mjs",
