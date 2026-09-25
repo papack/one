@@ -1,11 +1,11 @@
 {
   "name": "@papack/one",
   "description": "an all in one SSR Framework",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "author": "Matthias Steiner",
   "license": "MIT",
   "repository": "github:papack/one",
-  "homepage": "https://github.com/papack/one",
+  "homepage": "https://papack.one",
   "publishConfig": {
     "access": "public"
   },
