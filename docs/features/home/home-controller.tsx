@@ -1,6 +1,6 @@
 import { html } from "@papack/one/html";
 import { jsx } from "@papack/one/jsx";
-import { HTML } from "@papack/one/headers";
+import { HTML } from "@papack/one/constants";
 import { App } from "../../app";
 import { HomePage } from "./home-page";
 

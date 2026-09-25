@@ -32,10 +32,10 @@
       "import": "./dist/style/index.mjs",
       "require": "./dist/style/index.cjs"
     },
-    "./headers": {
-      "types": "./dist/headers/index.d.mts",
-      "import": "./dist/headers/index.mjs",
-      "require": "./dist/headers/index.cjs"
+    "./constants": {
+      "types": "./dist/constants/index.d.mts",
+      "import": "./dist/constants/index.mjs",
+      "require": "./dist/constants/index.cjs"
     },
     "./html": {
       "types": "./dist/html/index.d.mts",

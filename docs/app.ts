@@ -1,5 +1,5 @@
 import { Router } from "@papack/one";
-import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "@papack/one/headers";
+import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "@papack/one/constants";
 
 export class App {
   public router: Router;
