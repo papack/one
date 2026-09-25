@@ -13,6 +13,7 @@ DOM islands are available through the separate `@papack/one/dom` entry point.
 - Lightweight client-side DOM renderer with signals, lifecycle hooks, and helpers
 - Lightweight layout, style and design-token utilities
 - Swappable object storage for Buffers and Node.js streams
+- Dependency-free SMTP mail delivery with TLS, HTML, text and attachments
 - Synchronous, typed schemas for validating request and application data
 
 ## Install
@@ -140,6 +141,34 @@ const storage = new FileStorage({
 const id = await storage.write(Buffer.from("Hello object storage"));
 const object = await storage.read(id); // Buffer
 ```
+
+## SMTP mail
+
+Use `Smtp` from `@papack/one/smtp` to send mail with Node's built-in TCP/TLS
+modules. It supports STARTTLS, implicit TLS, AUTH PLAIN/LOGIN, text/HTML, CC/BCC
+and Buffer attachments without additional dependencies.
+
+```ts
+import { Smtp } from "@papack/one/smtp";
+
+const smtp = new Smtp({
+  from: "My App <hello@example.com>",
+  host: "smtp.example.com",
+  port: 587,
+  user: process.env.SMTP_USER!,
+  pass: process.env.SMTP_PASS!,
+});
+
+await smtp.send({
+  to: ["recipient@example.com"],
+  subject: "Hello",
+  text: "Hello from my app!",
+});
+```
+
+Connections open automatically and are reused until idle for 60 seconds
+(`idleTimeout`). Share one instance across endpoints; concurrent sends are queued.
+Use `await smtp.close()` only when shutting down the application.
 
 ## Schemas
 

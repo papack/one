@@ -11,6 +11,7 @@ export default defineConfig({
     "./jsx/index.ts",
     "./layout/index.ts",
     "./runtime/index.ts",
+    "./smtp/index.ts",
   ],
   format: ["esm", "cjs"],
   outDir: "dist",
