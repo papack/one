@@ -142,6 +142,19 @@ const id = await storage.write(Buffer.from("Hello object storage"));
 const object = await storage.read(id); // Buffer
 ```
 
+## Cache
+
+```ts
+import { cache } from "@papack/one/cache";
+
+const [get, clear] = cache(async () => Date.now(), 5_000);
+const value = await get(); // Reused for five seconds after loading
+clear(); // The next get() loads again
+```
+
+Omit the duration to cache indefinitely. Expired values refresh on the next
+`get()`; concurrent callers share the same load. See [cache semantics](./cache/readme.md).
+
 ## Logging
 
 ```ts

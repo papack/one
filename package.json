@@ -17,6 +17,11 @@
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
+    "./cache": {
+      "types": "./dist/cache/index.d.mts",
+      "import": "./dist/cache/index.mjs",
+      "require": "./dist/cache/index.cjs"
+    },
     "./log": {
       "types": "./dist/log/index.d.mts",
       "import": "./dist/log/index.mjs",

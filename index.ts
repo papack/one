@@ -8,3 +8,4 @@ export * from "./smtp";
 export * from "./bus";
 export * from "./cron";
 export * from "./log";
+export * from "./cache";
