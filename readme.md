@@ -142,6 +142,18 @@ const id = await storage.write(Buffer.from("Hello object storage"));
 const object = await storage.read(id); // Buffer
 ```
 
+## Logging
+
+```ts
+import { Logger } from "@papack/one/log";
+
+const log = new Logger({ loglevel: "info" });
+await log.info("server", "Started");
+```
+
+Use `NullLogger` to discard output. All adapters support `trace`, `info`, `warn`, and `err`.
+See [logging adapters and usage with Bus/Cron](./log/readme.md).
+
 ## Scheduled tasks
 
 Use `Cron` for minute-based tasks with an explicit lifecycle and optional timezone:

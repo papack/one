@@ -1,9 +1,5 @@
 # Cron
 
-Integrated from [papack/cron](https://github.com/papack/cron), revision
-`dcd83ed857c4484e6c92c986ddd1ed6a25b98097`, under the [MIT license](./license.md).
-No runtime dependencies are required.
-
 ```ts
 import { Cron } from "@papack/one/cron";
 
