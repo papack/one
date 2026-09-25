@@ -17,6 +17,11 @@
   "type": "module",
   "types": "./dist/index.d.mts",
   "exports": {
+    "./cron": {
+      "types": "./dist/cron/index.d.mts",
+      "import": "./dist/cron/index.mjs",
+      "require": "./dist/cron/index.cjs"
+    },
     "./bus": {
       "types": "./dist/bus/index.d.mts",
       "import": "./dist/bus/index.mjs",

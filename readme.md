@@ -142,6 +142,25 @@ const id = await storage.write(Buffer.from("Hello object storage"));
 const object = await storage.read(id); // Buffer
 ```
 
+## Scheduled tasks
+
+Use `Cron` for minute-based tasks with an explicit lifecycle and optional timezone:
+
+```ts
+import { Cron } from "@papack/one/cron";
+
+const cron = new Cron({
+  timezone: "Europe/Berlin",
+  onError: (error, context) => console.error(context.expression, error),
+});
+cron.schedule("*/5 * * * *", () => console.log("Every five minutes"));
+cron.start();
+// Call cron.stop() on shutdown.
+```
+
+See [Cron syntax and execution semantics](./cron/readme.md). Tasks run in this
+process; missed executions are not replayed and async tasks may overlap.
+
 ## Event bus
 
 `Bus` broadcasts events with `emit(topic, data): Promise<void>`. Listeners start
