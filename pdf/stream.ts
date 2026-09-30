@@ -2,7 +2,9 @@ import { Buffer } from "node:buffer";
 import { open } from "node:fs/promises";
 
 /** Collects a PDF web ReadableStream into one Node.js Buffer. */
-export async function pdfStreamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffer> {
+export async function pdfStreamToBuffer(
+  stream: ReadableStream<Uint8Array>,
+): Promise<Buffer> {
   const chunks: Uint8Array[] = [];
   let length = 0;
   for await (const chunk of readPdfChunks(stream)) {
@@ -22,8 +24,13 @@ export async function pdfStreamToDisk(
     for await (const chunk of readPdfChunks(stream)) {
       let offset = 0;
       while (offset < chunk.byteLength) {
-        const { bytesWritten } = await file.write(chunk, offset, chunk.byteLength - offset);
-        if (bytesWritten === 0) throw new Error("Could not write PDF data to disk.");
+        const { bytesWritten } = await file.write(
+          chunk,
+          offset,
+          chunk.byteLength - offset,
+        );
+        if (bytesWritten === 0)
+          throw new Error("Could not write PDF data to disk.");
         offset += bytesWritten;
       }
     }
@@ -32,7 +39,9 @@ export async function pdfStreamToDisk(
   }
 }
 
-async function* readPdfChunks(stream: ReadableStream<Uint8Array>): AsyncGenerator<Uint8Array> {
+async function* readPdfChunks(
+  stream: ReadableStream<Uint8Array>,
+): AsyncGenerator<Uint8Array> {
   const reader = stream.getReader();
   let completed = false;
   try {

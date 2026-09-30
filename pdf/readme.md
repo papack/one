@@ -10,7 +10,11 @@ import { pdf, pdfStreamToDisk } from "./pdf";
 const roboto = new Uint8Array(await readFile("fonts/Roboto.ttf"));
 
 const stream = pdf(
-  <document title="Quarterly report" author="Northwind Studio" style={{ fontFamily: "Roboto" }}>
+  <document
+    title="Quarterly report"
+    author="Northwind Studio"
+    style={{ fontFamily: "Roboto" }}
+  >
     <page size="A4" style={{ padding: 40 }}>
       <p style={{ fontSize: 24, fontWeight: "bold" }}>Quarterly report</p>
       <p>Generated with measured text and a custom layout.</p>
@@ -135,9 +139,7 @@ const stream = pdf(
       <Show when={hasSummary}>
         <p>Summary</p>
       </Show>
-      <For each={projects}>
-        {(project) => <p>{project.name}</p>}
-      </For>
+      <For each={projects}>{(project) => <p>{project.name}</p>}</For>
       <Repeat n={3}>
         <p>Repeated note</p>
       </Repeat>
@@ -170,12 +172,12 @@ Supported properties include `flexDirection`, `flex`, `flexGrow`, `flexShrink`, 
 
 `margin`, `padding`, individual sides, and horizontal and vertical shorthands are normalized. Unset spacing defaults to `0`; background and text colors default to white and black. Numeric layout dimensions are in PDF points. Colors can be CSS color names or hex values; a `border` shorthand such as `"2pt solid red"` is expanded into individual sides.
 
-| `position` | Behavior |
-| --- | --- |
-| `static` | Participates in normal document flow |
+| `position` | Behavior                                                                  |
+| ---------- | ------------------------------------------------------------------------- |
+| `static`   | Participates in normal document flow                                      |
 | `relative` | Offsets the box from its calculated position while keeping it in the flow |
-| `absolute` | Is removed from the flow and aligned to the nearest positioned ancestor |
-| `fixed` | Is aligned to the page and repeated on every output page |
+| `absolute` | Is removed from the flow and aligned to the nearest positioned ancestor   |
+| `fixed`    | Is aligned to the page and repeated on every output page                  |
 
 Create dynamic footers with `<page-number />` and `<pages-total />`:
 
@@ -209,7 +211,8 @@ const stream = pdf(
   <document style={{ fontFamily: "Roboto" }}>
     <page>
       <p style={{ fontSize: 18, lineHeight: 24 }}>
-        Text is measured and wrapped using the actual glyph widths from the TTF font.
+        Text is measured and wrapped using the actual glyph widths from the TTF
+        font.
       </p>
       <p style={{ fontWeight: "bold" }}>Bold text</p>
     </page>
@@ -286,9 +289,23 @@ SVGs can be added directly as JSX vectors or loaded from an SVG URL, SVG data UR
 
 ```tsx
 <svg width="240" height="120" viewBox="0 0 240 120">
-  <rect x="4" y="4" width="232" height="112" rx="12" fill="#eff8ff" stroke="#175cd3" strokeWidth="2" />
+  <rect
+    x="4"
+    y="4"
+    width="232"
+    height="112"
+    rx="12"
+    fill="#eff8ff"
+    stroke="#175cd3"
+    strokeWidth="2"
+  />
   <circle cx="48" cy="60" r="22" fill="#ff69b4" />
-  <path d="M 90 80 C 120 20 160 100 205 40" fill="none" stroke="#7c3aed" strokeWidth="4" />
+  <path
+    d="M 90 80 C 120 20 160 100 205 40"
+    fill="none"
+    stroke="#7c3aed"
+    strokeWidth="4"
+  />
 </svg>
 ```
 
@@ -315,11 +332,11 @@ It generates `benchmark-10000-pages.pdf` and `benchmark-10000-pages.json`. The r
 
 ## Supported image formats
 
-| Format | Support |
-| --- | --- |
-| JPEG/JPG | Supported; grayscale and RGB JPEG |
-| PNG | Non-interlaced, 8-bit: RGB, RGBA, grayscale, and grayscale with alpha |
-| SVG | Subset supported as JSX, URL, or SVG data URL |
-| GIF | Not supported |
+| Format   | Support                                                               |
+| -------- | --------------------------------------------------------------------- |
+| JPEG/JPG | Supported; grayscale and RGB JPEG                                     |
+| PNG      | Non-interlaced, 8-bit: RGB, RGBA, grayscale, and grayscale with alpha |
+| SVG      | Subset supported as JSX, URL, or SVG data URL                         |
+| GIF      | Not supported                                                         |
 
 The included `fonts/Roboto.ttf` comes from Google Fonts; its SIL Open Font License is in [`fonts/OFL.txt`](./fonts/OFL.txt).

@@ -22,7 +22,11 @@ export type TtfSubset = {
 };
 
 /** Reads TrueType cmap and hmtx tables for exact glyph advances and PDF embedding. */
-export function parseTtfFont(family: string, source: ArrayBuffer | Uint8Array, weight = 400): TtfFont {
+export function parseTtfFont(
+  family: string,
+  source: ArrayBuffer | Uint8Array,
+  weight = 400,
+): TtfFont {
   const bytes = source instanceof Uint8Array ? source : new Uint8Array(source);
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const tables = readTables(view);
@@ -33,8 +37,10 @@ export function parseTtfFont(family: string, source: ArrayBuffer | Uint8Array, w
   const cmap = table(tables, "cmap");
   const unitsPerEm = view.getUint16(head.offset + 18);
   const bbox: [number, number, number, number] = [
-    view.getInt16(head.offset + 36), view.getInt16(head.offset + 38),
-    view.getInt16(head.offset + 40), view.getInt16(head.offset + 42),
+    view.getInt16(head.offset + 36),
+    view.getInt16(head.offset + 38),
+    view.getInt16(head.offset + 40),
+    view.getInt16(head.offset + 42),
   ];
   const ascent = view.getInt16(hhea.offset + 4);
   const descent = view.getInt16(hhea.offset + 6);
@@ -43,7 +49,8 @@ export function parseTtfFont(family: string, source: ArrayBuffer | Uint8Array, w
   const advances = new Uint16Array(glyphCount);
   let lastAdvance = 0;
   for (let glyph = 0; glyph < glyphCount; glyph++) {
-    if (glyph < numberOfMetrics) lastAdvance = view.getUint16(hmtx.offset + glyph * 4);
+    if (glyph < numberOfMetrics)
+      lastAdvance = view.getUint16(hmtx.offset + glyph * 4);
     advances[glyph] = lastAdvance;
   }
   const glyphLookup = createCmapLookup(view, cmap);
@@ -62,12 +69,17 @@ export function parseTtfFont(family: string, source: ArrayBuffer | Uint8Array, w
     capHeight: readCapHeight(view, tables, ascent),
     bbox,
     glyphId: glyphLookup,
-    width(codePoint) { return advances[glyphLookup(codePoint)] ?? advances[0] ?? unitsPerEm; },
+    width(codePoint) {
+      return advances[glyphLookup(codePoint)] ?? advances[0] ?? unitsPerEm;
+    },
     collect(codePoint) {
       const existing = collected.get(codePoint);
       if (existing !== undefined) return existing;
       const cid = codePoints.length + 1;
-      if (cid > 0xffff) throw new Error(`Font ${family} uses more than 65,535 unique characters`);
+      if (cid > 0xffff)
+        throw new Error(
+          `Font ${family} uses more than 65,535 unique characters`,
+        );
       collected.set(codePoint, cid);
       codePoints.push(codePoint);
       const glyph = glyphLookup(codePoint);
@@ -76,16 +88,26 @@ export function parseTtfFont(family: string, source: ArrayBuffer | Uint8Array, w
       return cid;
     },
     codePoints: () => codePoints,
-    cid(codePoint) { return collected.get(codePoint) ?? 0; },
-    glyphForCid(cid) { return glyphs[cid] ?? 0; },
-    widthForCid(cid) { return widths[cid] ?? 0; },
+    cid(codePoint) {
+      return collected.get(codePoint) ?? 0;
+    },
+    glyphForCid(cid) {
+      return glyphs[cid] ?? 0;
+    },
+    widthForCid(cid) {
+      return widths[cid] ?? 0;
+    },
   };
 }
 
 /** Builds a compact PDF font program containing only collected glyphs. */
 export function subsetTtfFont(font: TtfFont): TtfSubset {
   const source = font.bytes;
-  const sourceView = new DataView(source.buffer, source.byteOffset, source.byteLength);
+  const sourceView = new DataView(
+    source.buffer,
+    source.byteOffset,
+    source.byteLength,
+  );
   const tables = readTables(sourceView);
   const required = (tag: string) => {
     const found = tables.get(tag);
@@ -98,12 +120,12 @@ export function subsetTtfFont(font: TtfFont): TtfSubset {
   const hmtxTable = required("hmtx");
   const locaTable = required("loca");
   const glyfTable = required("glyf");
-  const originalGlyphCount = sourceView.getUint16(maxpTable.offset + 4);
   const locaFormat = sourceView.getInt16(headTable.offset + 50);
   const metricCount = sourceView.getUint16(hheaTable.offset + 34);
-  const glyphOffset = (glyph: number) => locaFormat === 0
-    ? sourceView.getUint16(locaTable.offset + glyph * 2) * 2
-    : sourceView.getUint32(locaTable.offset + glyph * 4);
+  const glyphOffset = (glyph: number) =>
+    locaFormat === 0
+      ? sourceView.getUint16(locaTable.offset + glyph * 2) * 2
+      : sourceView.getUint32(locaTable.offset + glyph * 4);
   const mapping = new Map<number, number>([[0, 0]]);
   const originals = [0];
   const include = (glyph: number) => {
@@ -126,8 +148,14 @@ export function subsetTtfFont(font: TtfFont): TtfSubset {
     offsets.push(glyfLength);
     const start = glyphOffset(originalGlyph);
     const end = glyphOffset(originalGlyph + 1);
-    let glyphBytes: Uint8Array = source.slice(glyfTable.offset + start, glyfTable.offset + end);
-    if (glyphBytes.length >= 10 && sourceView.getInt16(glyfTable.offset + start) < 0)
+    let glyphBytes: Uint8Array = source.slice(
+      glyfTable.offset + start,
+      glyfTable.offset + end,
+    );
+    if (
+      glyphBytes.length >= 10 &&
+      sourceView.getInt16(glyfTable.offset + start) < 0
+    )
       glyphBytes = remapCompositeGlyph(glyphBytes, include);
     if (glyphBytes.length & 1) {
       const padded = new Uint8Array(glyphBytes.length + 1);
@@ -142,26 +170,42 @@ export function subsetTtfFont(font: TtfFont): TtfSubset {
   const glyf = joinBytes(glyfParts, glyfLength);
   const loca = new Uint8Array(offsets.length * 4);
   const locaView = new DataView(loca.buffer);
-  for (let index = 0; index < offsets.length; index++) locaView.setUint32(index * 4, offsets[index]);
+  for (let index = 0; index < offsets.length; index++)
+    locaView.setUint32(index * 4, offsets[index]);
 
   const hmtx = new Uint8Array(originals.length * 4);
   const hmtxView = new DataView(hmtx.buffer);
-  const lastAdvance = sourceView.getUint16(hmtxTable.offset + (metricCount - 1) * 4);
+  const lastAdvance = sourceView.getUint16(
+    hmtxTable.offset + (metricCount - 1) * 4,
+  );
   for (let index = 0; index < originals.length; index++) {
     const glyph = originals[index];
-    const advance = glyph < metricCount
-      ? sourceView.getUint16(hmtxTable.offset + glyph * 4)
-      : lastAdvance;
-    const bearing = glyph < metricCount
-      ? sourceView.getInt16(hmtxTable.offset + glyph * 4 + 2)
-      : sourceView.getInt16(hmtxTable.offset + metricCount * 4 + (glyph - metricCount) * 2);
+    const advance =
+      glyph < metricCount
+        ? sourceView.getUint16(hmtxTable.offset + glyph * 4)
+        : lastAdvance;
+    const bearing =
+      glyph < metricCount
+        ? sourceView.getInt16(hmtxTable.offset + glyph * 4 + 2)
+        : sourceView.getInt16(
+            hmtxTable.offset + metricCount * 4 + (glyph - metricCount) * 2,
+          );
     hmtxView.setUint16(index * 4, advance);
     hmtxView.setInt16(index * 4 + 2, bearing);
   }
 
-  const head = source.slice(headTable.offset, headTable.offset + headTable.length);
-  const hhea = source.slice(hheaTable.offset, hheaTable.offset + hheaTable.length);
-  const maxp = source.slice(maxpTable.offset, maxpTable.offset + maxpTable.length);
+  const head = source.slice(
+    headTable.offset,
+    headTable.offset + headTable.length,
+  );
+  const hhea = source.slice(
+    hheaTable.offset,
+    hheaTable.offset + hheaTable.length,
+  );
+  const maxp = source.slice(
+    maxpTable.offset,
+    maxpTable.offset + maxpTable.length,
+  );
   const headView = new DataView(head.buffer, head.byteOffset, head.byteLength);
   const hheaView = new DataView(hhea.buffer, hhea.byteOffset, hhea.byteLength);
   const maxpView = new DataView(maxp.buffer, maxp.byteOffset, maxp.byteLength);
@@ -171,22 +215,39 @@ export function subsetTtfFont(font: TtfFont): TtfSubset {
   maxpView.setUint16(4, originals.length);
 
   const subsetTables = new Map<string, Uint8Array>([
-    ["glyf", glyf], ["head", head], ["hhea", hhea], ["hmtx", hmtx],
-    ["loca", loca], ["maxp", maxp],
+    ["glyf", glyf],
+    ["head", head],
+    ["hhea", hhea],
+    ["hmtx", hmtx],
+    ["loca", loca],
+    ["maxp", maxp],
   ]);
   for (const tag of ["cvt ", "fpgm", "prep"]) {
     const table = tables.get(tag);
-    if (table) subsetTables.set(tag, source.slice(table.offset, table.offset + table.length));
+    if (table)
+      subsetTables.set(
+        tag,
+        source.slice(table.offset, table.offset + table.length),
+      );
   }
   return {
     bytes: encodeSfnt(subsetTables),
-    glyphForCid(cid) { return cidMappings[cid] ?? 0; },
+    glyphForCid(cid) {
+      return cidMappings[cid] ?? 0;
+    },
   };
 }
 
-function remapCompositeGlyph(glyph: Uint8Array, include: (glyph: number) => number): Uint8Array {
+function remapCompositeGlyph(
+  glyph: Uint8Array,
+  include: (glyph: number) => number,
+): Uint8Array {
   const output = glyph.slice();
-  const view = new DataView(output.buffer, output.byteOffset, output.byteLength);
+  const view = new DataView(
+    output.buffer,
+    output.byteOffset,
+    output.byteLength,
+  );
   let position = 10;
   let flags: number;
   do {
@@ -203,7 +264,9 @@ function remapCompositeGlyph(glyph: Uint8Array, include: (glyph: number) => numb
 }
 
 function encodeSfnt(tables: Map<string, Uint8Array>): Uint8Array {
-  const ordered = [...tables].sort(([left], [right]) => left.localeCompare(right));
+  const ordered = [...tables].sort(([left], [right]) =>
+    left.localeCompare(right),
+  );
   const count = ordered.length;
   const power = 2 ** Math.floor(Math.log2(count));
   const directoryLength = 12 + count * 16;
@@ -222,7 +285,8 @@ function encodeSfnt(tables: Map<string, Uint8Array>): Uint8Array {
   view.setUint16(10, count * 16 - power * 16);
   records.forEach((record, index) => {
     const position = 12 + index * 16;
-    for (let character = 0; character < 4; character++) output[position + character] = record.tag.charCodeAt(character);
+    for (let character = 0; character < 4; character++)
+      output[position + character] = record.tag.charCodeAt(character);
     view.setUint32(position + 4, record.checksum);
     view.setUint32(position + 8, record.offset);
     view.setUint32(position + 12, record.bytes.length);
@@ -237,8 +301,11 @@ function encodeSfnt(tables: Map<string, Uint8Array>): Uint8Array {
 function checksum(bytes: Uint8Array): number {
   let sum = 0;
   for (let offset = 0; offset < bytes.length; offset += 4) {
-    const word = ((bytes[offset] ?? 0) << 24) | ((bytes[offset + 1] ?? 0) << 16) |
-      ((bytes[offset + 2] ?? 0) << 8) | (bytes[offset + 3] ?? 0);
+    const word =
+      ((bytes[offset] ?? 0) << 24) |
+      ((bytes[offset + 1] ?? 0) << 16) |
+      ((bytes[offset + 2] ?? 0) << 8) |
+      (bytes[offset + 3] ?? 0);
     sum = (sum + (word >>> 0)) >>> 0;
   }
   return sum;
@@ -247,7 +314,10 @@ function checksum(bytes: Uint8Array): number {
 function joinBytes(parts: Uint8Array[], length: number): Uint8Array {
   const output = new Uint8Array(length);
   let offset = 0;
-  for (const part of parts) { output.set(part, offset); offset += part.length; }
+  for (const part of parts) {
+    output.set(part, offset);
+    offset += part.length;
+  }
   return output;
 }
 
@@ -258,8 +328,16 @@ function readTables(view: DataView): Map<string, Table> {
   const tables = new Map<string, Table>();
   for (let index = 0; index < count; index++) {
     const record = 12 + index * 16;
-    const tag = String.fromCharCode(view.getUint8(record), view.getUint8(record + 1), view.getUint8(record + 2), view.getUint8(record + 3));
-    tables.set(tag, { offset: view.getUint32(record + 8), length: view.getUint32(record + 12) });
+    const tag = String.fromCharCode(
+      view.getUint8(record),
+      view.getUint8(record + 1),
+      view.getUint8(record + 2),
+      view.getUint8(record + 3),
+    );
+    tables.set(tag, {
+      offset: view.getUint32(record + 8),
+      length: view.getUint32(record + 12),
+    });
   }
   return tables;
 }
@@ -270,7 +348,10 @@ function table(tables: Map<string, Table>, tag: string): Table {
   return found;
 }
 
-function createCmapLookup(view: DataView, cmap: Table): (codePoint: number) => number {
+function createCmapLookup(
+  view: DataView,
+  cmap: Table,
+): (codePoint: number) => number {
   const count = view.getUint16(cmap.offset + 2);
   let best: { offset: number; format: number } | undefined;
   for (let index = 0; index < count; index++) {
@@ -279,18 +360,34 @@ function createCmapLookup(view: DataView, cmap: Table): (codePoint: number) => n
     const encoding = view.getUint16(record + 2);
     const subtableOffset = cmap.offset + view.getUint32(record + 4);
     const format = view.getUint16(subtableOffset);
-    const supported = format === 12 || (format === 4 && codePointInBmp(platform, encoding));
-    if (supported && (!best || format > best.format || (format === best.format && platform === 3))) best = { offset: subtableOffset, format };
+    const supported =
+      format === 12 || (format === 4 && codePointInBmp(platform, encoding));
+    if (
+      supported &&
+      (!best ||
+        format > best.format ||
+        (format === best.format && platform === 3))
+    )
+      best = { offset: subtableOffset, format };
   }
-  if (!best) throw new Error("TTF font has no supported Unicode cmap (format 4 or 12)");
-  return best.format === 12 ? (codePoint) => glyphForFormat12(view, best!.offset, codePoint) : (codePoint) => glyphForFormat4(view, best!.offset, codePoint);
+  if (!best)
+    throw new Error("TTF font has no supported Unicode cmap (format 4 or 12)");
+  return best.format === 12
+    ? (codePoint) => glyphForFormat12(view, best!.offset, codePoint)
+    : (codePoint) => glyphForFormat4(view, best!.offset, codePoint);
 }
 
 function codePointInBmp(platform: number, encoding: number): boolean {
-  return platform === 0 || (platform === 3 && (encoding === 1 || encoding === 10));
+  return (
+    platform === 0 || (platform === 3 && (encoding === 1 || encoding === 10))
+  );
 }
 
-function glyphForFormat12(view: DataView, offset: number, codePoint: number): number {
+function glyphForFormat12(
+  view: DataView,
+  offset: number,
+  codePoint: number,
+): number {
   const groups = view.getUint32(offset + 12);
   let low = 0;
   let high = groups - 1;
@@ -306,7 +403,11 @@ function glyphForFormat12(view: DataView, offset: number, codePoint: number): nu
   return 0;
 }
 
-function glyphForFormat4(view: DataView, offset: number, codePoint: number): number {
+function glyphForFormat4(
+  view: DataView,
+  offset: number,
+  codePoint: number,
+): number {
   if (codePoint > 0xffff) return 0;
   const segmentCount = view.getUint16(offset + 6) / 2;
   const endCodes = offset + 14;
@@ -322,14 +423,21 @@ function glyphForFormat4(view: DataView, offset: number, codePoint: number): num
     const rangeOffsetAddress = rangeOffsets + index * 2;
     const rangeOffset = view.getUint16(rangeOffsetAddress);
     if (rangeOffset === 0) return (codePoint + delta) & 0xffff;
-    const glyphAddress = rangeOffsetAddress + rangeOffset + (codePoint - start) * 2;
+    const glyphAddress =
+      rangeOffsetAddress + rangeOffset + (codePoint - start) * 2;
     const glyph = view.getUint16(glyphAddress);
     return glyph === 0 ? 0 : (glyph + delta) & 0xffff;
   }
   return 0;
 }
 
-function readCapHeight(view: DataView, tables: Map<string, Table>, fallback: number): number {
+function readCapHeight(
+  view: DataView,
+  tables: Map<string, Table>,
+  fallback: number,
+): number {
   const os2 = tables.get("OS/2");
-  return os2 && os2.length >= 90 && view.getInt16(os2.offset) >= 2 ? view.getInt16(os2.offset + 88) : fallback;
+  return os2 && os2.length >= 90 && view.getInt16(os2.offset) >= 2
+    ? view.getInt16(os2.offset + 88)
+    : fallback;
 }

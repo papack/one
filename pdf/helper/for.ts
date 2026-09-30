@@ -13,5 +13,7 @@ export function For<T>({ each, children }: ForProps<T>): JSXElement {
   if (typeof render !== "function") {
     throw new Error("<For> expects a single function child");
   }
-  return each.map((item, index) => render(item, index)) as unknown as JSXElement;
+  return each.map((item, index) =>
+    render(item, index),
+  ) as unknown as JSXElement;
 }

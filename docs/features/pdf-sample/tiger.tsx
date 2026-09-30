@@ -3,7 +3,10 @@ import { jsx } from "@papack/one/jsx";
 export function Tiger() {
   return (
     <svg viewBox="0 0 900 900" width="480" height="480">
-      <g fill="none" transform="matrix(1.7656463,0,0,1.7656463,324.90716,255.00942)">
+      <g
+        fill="none"
+        transform="matrix(1.7656463,0,0,1.7656463,324.90716,255.00942)"
+      >
         <g strokeWidth="0.17200001" stroke="#000" fill="#FFF">
           <path d="m-122.3,84.285s0.1,1.894-0.73,1.875c-0.82-0.019-17.27-48.094-37.8-45.851,0,0,17.78-7.353,38.53,43.976z" />
         </g>

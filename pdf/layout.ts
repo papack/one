@@ -36,10 +36,6 @@ export type LayoutItem = {
 };
 
 export function gridColumns(item: LayoutItem): number[] {
-  const childCount = Math.max(
-    1,
-    item.children.filter((child) => !isOutOfFlow(child)).length,
-  );
   const raw =
     typeof item.style.gridTemplateColumns === "string"
       ? item.style.gridTemplateColumns
@@ -345,10 +341,7 @@ export function getEdges(
   const edge = (value: unknown, fallback: unknown) =>
     length(value) ?? length(fallback) ?? 0;
   return {
-    top: edge(
-      style[`${kind}Top`],
-      style[`${kind}Vertical`] ?? style[kind],
-    ),
+    top: edge(style[`${kind}Top`], style[`${kind}Vertical`] ?? style[kind]),
     right: edge(
       style[`${kind}Right`],
       style[`${kind}Horizontal`] ?? style[kind],
@@ -357,26 +350,31 @@ export function getEdges(
       style[`${kind}Bottom`],
       style[`${kind}Vertical`] ?? style[kind],
     ),
-    left: edge(
-      style[`${kind}Left`],
-      style[`${kind}Horizontal`] ?? style[kind],
-    ),
+    left: edge(style[`${kind}Left`], style[`${kind}Horizontal`] ?? style[kind]),
   };
 }
 
 function length(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value !== "string") return undefined;
-  const match = /^(-?(?:\d+\.?\d*|\.\d+))(pt|px|in|mm|cm|rem)?$/i.exec(value.trim());
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))(pt|px|in|mm|cm|rem)?$/i.exec(
+    value.trim(),
+  );
   if (!match) return undefined;
   const amount = Number(match[1]);
   switch ((match[2] ?? "pt").toLowerCase()) {
-    case "px": return amount * 0.75;
-    case "rem": return amount * 12;
-    case "in": return amount * 72;
-    case "mm": return amount * 72 / 25.4;
-    case "cm": return amount * 72 / 2.54;
-    default: return amount;
+    case "px":
+      return amount * 0.75;
+    case "rem":
+      return amount * 12;
+    case "in":
+      return amount * 72;
+    case "mm":
+      return (amount * 72) / 25.4;
+    case "cm":
+      return (amount * 72) / 2.54;
+    default:
+      return amount;
   }
 }
 
@@ -384,20 +382,30 @@ export function dimension(value: unknown, basis?: number): number | undefined {
   if (typeof value === "number" && Number.isFinite(value))
     return Math.max(0, value);
   if (typeof value !== "string") return undefined;
-  const match = /^(-?(?:\d+\.?\d*|\.\d+))(pt|px|in|mm|cm|rem|%|vw|vh)?$/i.exec(value.trim());
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))(pt|px|in|mm|cm|rem|%|vw|vh)?$/i.exec(
+    value.trim(),
+  );
   if (!match) return undefined;
   const amount = Number(match[1]);
   switch ((match[2] ?? "pt").toLowerCase()) {
     case "%":
     case "vw":
     case "vh":
-      return basis === undefined ? undefined : Math.max(0, (basis * amount) / 100);
-    case "px": return Math.max(0, amount * 0.75);
-    case "rem": return Math.max(0, amount * 12);
-    case "in": return Math.max(0, amount * 72);
-    case "mm": return Math.max(0, amount * 72 / 25.4);
-    case "cm": return Math.max(0, amount * 72 / 2.54);
-    default: return Math.max(0, amount);
+      return basis === undefined
+        ? undefined
+        : Math.max(0, (basis * amount) / 100);
+    case "px":
+      return Math.max(0, amount * 0.75);
+    case "rem":
+      return Math.max(0, amount * 12);
+    case "in":
+      return Math.max(0, amount * 72);
+    case "mm":
+      return Math.max(0, (amount * 72) / 25.4);
+    case "cm":
+      return Math.max(0, (amount * 72) / 2.54);
+    default:
+      return Math.max(0, amount);
   }
 }
 
@@ -616,7 +624,6 @@ function computeWidth(
     );
     item.widthMode = explicitWidth === undefined ? "intrinsic" : "constrained";
     const columns = gridColumns(item);
-    const gap = length(item.style.columnGap ?? item.style.gap) ?? 0;
     const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
     flowChildren.forEach((child, index) => {
       const col = index % columns.length;
@@ -642,10 +649,10 @@ function computeWidth(
   const direction = flexDirection(item);
   const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
   const gap = isFlex
-    ? length(
+    ? (length(
         item.style[direction === "row" ? "columnGap" : "rowGap"] ??
           item.style.gap,
-      ) ?? 0
+      ) ?? 0)
     : 0;
   const explicitWidth =
     forcedWidth ??
@@ -1104,10 +1111,10 @@ function resolveIntrinsicWidths(item: LayoutItem): void {
   if (item.widthMode !== "intrinsic") return;
   const gap =
     item.style.display === "flex"
-      ? length(
+      ? (length(
           item.style[direction === "row" ? "columnGap" : "rowGap"] ??
             item.style.gap,
-        ) ?? 0
+        ) ?? 0)
       : 0;
   const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
   const flowWidth =
@@ -1230,7 +1237,7 @@ function computeHeight(
         containingHeight,
         viewportHeight,
       );
-    const rowHeights = new Array(rows).fill(0);
+    const rowHeights = Array.from({ length: rows }, () => 0);
     children.forEach((child, index) => {
       rowHeights[Math.floor(index / columns.length)] = Math.max(
         rowHeights[Math.floor(index / columns.length)],
@@ -1262,10 +1269,10 @@ function computeHeight(
   const direction = flexDirection(item);
   const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
   const gap = isFlex
-    ? length(
+    ? (length(
         item.style[direction === "row" ? "columnGap" : "rowGap"] ??
           item.style.gap,
-      ) ?? 0
+      ) ?? 0)
     : 0;
   const explicitHeight =
     forcedHeight ??
@@ -1496,7 +1503,7 @@ function place(
     const children = item.children.filter((child) => !isOutOfFlow(child));
     const columns = gridColumns(item);
     const rows = Math.max(1, Math.ceil(children.length / columns.length));
-    const rowHeights = new Array(rows).fill(0);
+    const rowHeights = Array.from({ length: rows }, () => 0);
     children.forEach((child, index) => {
       rowHeights[Math.floor(index / columns.length)] = Math.max(
         rowHeights[Math.floor(index / columns.length)],
@@ -1558,7 +1565,8 @@ function place(
       : children;
   const gap =
     item.style.display === "flex"
-      ? length(item.style[row ? "columnGap" : "rowGap"] ?? item.style.gap) ?? 0
+      ? (length(item.style[row ? "columnGap" : "rowGap"] ?? item.style.gap) ??
+        0)
       : 0;
   const startX = x + item.padding.left;
   const startY = y + item.padding.top;

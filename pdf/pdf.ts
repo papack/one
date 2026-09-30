@@ -2,7 +2,11 @@ import type { JSXElement } from "../jsx/jsx";
 import { layout } from "./layout";
 import { postprocess } from "./postprocess";
 import { getPdfDocumentContext } from "./context";
-import { collectPdfImages, createFontMap, type FontFamilySource } from "./fonts";
+import {
+  collectPdfImages,
+  createFontMap,
+  type FontFamilySource,
+} from "./fonts";
 import { render } from "./render";
 import { resolve } from "./resolve";
 
@@ -12,13 +16,18 @@ export type PdfOptions = {
 };
 
 /** Orchestrates the PDF pipeline and returns its output as a web ReadableStream. */
-export function pdf(element: JSXElement, options: PdfOptions = {}): ReadableStream<Uint8Array> {
+export function pdf(
+  element: JSXElement,
+  options: PdfOptions = {},
+): ReadableStream<Uint8Array> {
   return createPdfStream((writer) => renderPdf(element, writer, options));
 }
 
 /** Starts the PDF pipeline in a web stream and forwards failures to its reader. */
 function createPdfStream(
-  runPipeline: (writer: WritableStreamDefaultWriter<Uint8Array>) => Promise<void>,
+  runPipeline: (
+    writer: WritableStreamDefaultWriter<Uint8Array>,
+  ) => Promise<void>,
 ): ReadableStream<Uint8Array> {
   const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
   const writer = writable.getWriter();

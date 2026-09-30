@@ -55,7 +55,11 @@ export async function createRenderState(
   for (const image of images) {
     const imageId = nextCustomObject++;
     const alphaId = image.alpha ? nextCustomObject++ : undefined;
-    imageObjects.set(image, { image: imageId, ...(alphaId ? { alpha: alphaId } : {}), resource: `Im${imageIndex++}` });
+    imageObjects.set(image, {
+      image: imageId,
+      ...(alphaId ? { alpha: alphaId } : {}),
+      resource: `Im${imageIndex++}`,
+    });
   }
   const infoObject = nextCustomObject;
   const metadataObject = nextCustomObject + 1;
@@ -66,7 +70,7 @@ export async function createRenderState(
   const objectCount = totalPages
     ? pageObjectId(totalPages - 1) + 1
     : firstPageObject - 1;
-  const offsets = new Array<number>(objectCount + 1).fill(0);
+  const offsets = Array.from({ length: objectCount + 1 }, () => 0);
   let offset = 0;
 
   const writeObject = async (id: number, body: string | Uint8Array) => {
@@ -103,7 +107,8 @@ export async function createRenderState(
   );
   for (const font of fonts.values())
     await writeTtfFont(font, fontObjects.get(font)!, writeObject);
-  for (const image of images) await writeImage(image, imageObjects.get(image)!, writeObject);
+  for (const image of images)
+    await writeImage(image, imageObjects.get(image)!, writeObject);
   await writeObject(infoObject, documentInfo(metadata));
   await writeObject(
     metadataObject,
@@ -125,7 +130,10 @@ export async function createRenderState(
   const resources = ["/F1 3 0 R", "/F2 4 0 R"];
   for (const ids of fontObjects.values())
     resources.push(`/${ids.resource} ${ids.type0} 0 R`);
-  const imageResources = images.map((image) => `/${imageObjects.get(image)!.resource} ${imageObjects.get(image)!.image} 0 R`);
+  const imageResources = images.map(
+    (image) =>
+      `/${imageObjects.get(image)!.resource} ${imageObjects.get(image)!.image} 0 R`,
+  );
   return {
     async writePages(pages, firstPageIndex) {
       for (let index = 0; index < pages.length; index++) {
@@ -139,7 +147,15 @@ export async function createRenderState(
           totalPages: numeric(props.totalPages, totalPages),
         };
         const commands = encodeLatin1(
-          renderPage(page, height, width, fonts, fontObjects, imageObjects, pageNumbers),
+          renderPage(
+            page,
+            height,
+            width,
+            fonts,
+            fontObjects,
+            imageObjects,
+            pageNumbers,
+          ),
         );
         const pageId = pageObjectId(globalIndex);
         await writeObject(
@@ -173,7 +189,13 @@ export async function render(
   metadata: DocumentMetadata = {},
   images: readonly PdfImage[] = [],
 ): Promise<void> {
-  const state = await createRenderState(pages.length, writer, fonts, metadata, images);
+  const state = await createRenderState(
+    pages.length,
+    writer,
+    fonts,
+    metadata,
+    images,
+  );
   await state.writePages(pages, 0);
   await state.finish();
 }
@@ -183,7 +205,9 @@ async function writeTtfFont(
   ids: FontObjects,
   writeObject: (id: number, body: string | Uint8Array) => Promise<void>,
 ): Promise<void> {
-  const faceName = pdfName(`${font.family}${font.weight === 400 ? "" : `-${font.weight}`}`);
+  const faceName = pdfName(
+    `${font.family}${font.weight === 400 ? "" : `-${font.weight}`}`,
+  );
   const baseFont = `${subsetPrefix(font)}+${faceName}`;
   const subset = subsetTtfFont(font);
   const widths = font
@@ -233,16 +257,22 @@ async function writeImage(
   const alpha = ids.alpha ? ` /SMask ${ids.alpha} 0 R` : "";
   await writeObject(
     ids.image,
-    await streamBody(image.bytes,
+    await streamBody(
+      image.bytes,
       `/Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} ` +
-      `/ColorSpace /${image.colorSpace} /BitsPerComponent 8 /Filter ${filter}${alpha}`, false),
+        `/ColorSpace /${image.colorSpace} /BitsPerComponent 8 /Filter ${filter}${alpha}`,
+      false,
+    ),
   );
   if (ids.alpha && image.alpha) {
     await writeObject(
       ids.alpha,
-      await streamBody(image.alpha,
+      await streamBody(
+        image.alpha,
         `/Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} ` +
-        `/ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode`, false),
+          `/ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode`,
+        false,
+      ),
     );
   }
 }
@@ -289,7 +319,15 @@ function renderPage(
   pageNumbers: PageNumbers,
 ): string {
   const commands = [`1 1 1 rg 0 0 ${pageWidth} ${pageHeight} re f`];
-  drawNode(page, pageHeight, commands, fonts, fontObjects, imageObjects, pageNumbers);
+  drawNode(
+    page,
+    pageHeight,
+    commands,
+    fonts,
+    fontObjects,
+    imageObjects,
+    pageNumbers,
+  );
   return commands.join("\n");
 }
 
@@ -307,7 +345,10 @@ function drawNode(
     const style = asRecord(node.props.style);
     const background = color(style.backgroundColor);
     if (
-      (node.type === "div" || node.type === "page" || node.type === "table-cell") &&
+      (node.type === "div" ||
+        node.type === "p" ||
+        node.type === "page" ||
+        node.type === "table-cell") &&
       background &&
       !isWhite(style.backgroundColor)
     ) {
@@ -315,8 +356,20 @@ function drawNode(
         `q ${background} rg ${box.xPos} ${pageHeight - box.yPos - box.height} ${box.width} ${box.height} re f Q`,
       );
     }
-    if (node.type === "div" || node.type === "page" || node.type === "table-cell") {
-      drawBorders(box.xPos, pageHeight - box.yPos - box.height, box.width, box.height, style, commands);
+    if (
+      node.type === "div" ||
+      node.type === "p" ||
+      node.type === "page" ||
+      node.type === "table-cell"
+    ) {
+      drawBorders(
+        box.xPos,
+        pageHeight - box.yPos - box.height,
+        box.width,
+        box.height,
+        style,
+        commands,
+      );
     }
     if (node.type === "#text") {
       const value = String(node.props.value ?? "");
@@ -349,29 +402,46 @@ function drawNode(
       const textX = box.xPos;
       if (font) {
         const ids = fontObjects.get(font)!;
-        if (textStyle.writingMode === "vertical-rl" || textStyle.writingMode === "vertical-lr") {
-          const verticalX = textStyle.writingMode === "vertical-rl" ? box.xPos + box.width - size : box.xPos;
+        if (
+          textStyle.writingMode === "vertical-rl" ||
+          textStyle.writingMode === "vertical-lr"
+        ) {
+          const verticalX =
+            textStyle.writingMode === "vertical-rl"
+              ? box.xPos + box.width - size
+              : box.xPos;
           const glyphs = Array.from(lines.join(""));
           glyphs.forEach((character, index) => {
-            const baseline = pageHeight - box.yPos - index * lineHeight - (font.ascent * size) / font.unitsPerEm;
+            const baseline =
+              pageHeight -
+              box.yPos -
+              index * lineHeight -
+              (font.ascent * size) / font.unitsPerEm;
             const verticalBaseline = baseline - index * letterSpacing;
-            commands.push(`BT /${ids.resource} ${size} Tf ${fill} rg 0 -1 1 0 ${verticalX} ${verticalBaseline} Tm <${encodeGlyphs(character, font)}> Tj ET`);
+            commands.push(
+              `BT /${ids.resource} ${size} Tf ${fill} rg 0 -1 1 0 ${verticalX} ${verticalBaseline} Tm <${encodeGlyphs(character, font)}> Tj ET`,
+            );
           });
         } else {
-        const targetWeight = fontWeightValue(textStyle.fontWeight);
-        const italic = textStyle.fontStyle === "italic" || textStyle.fontStyle === "oblique";
-        const textMatrix = italic ? "1 0 0.2 1" : "1 0 0 1";
-        const syntheticBold = targetWeight >= 600 && font.weight < targetWeight ? `2 Tr ${fill} RG 0.25 w ` : "";
-        lines.forEach((line, index) => {
-          const baseline =
-            pageHeight -
-            box.yPos -
-            index * lineHeight -
-            (font.ascent * size) / font.unitsPerEm;
-          commands.push(
-            `BT /${ids.resource} ${size} Tf ${fill} rg ${syntheticBold}${letterSpacing} Tc ${textMatrix} ${textX} ${baseline} Tm <${encodeGlyphs(line, font)}> Tj 0 Tr ET`,
-          );
-        });
+          const targetWeight = fontWeightValue(textStyle.fontWeight);
+          const italic =
+            textStyle.fontStyle === "italic" ||
+            textStyle.fontStyle === "oblique";
+          const textMatrix = italic ? "1 0 0.2 1" : "1 0 0 1";
+          const syntheticBold =
+            targetWeight >= 600 && font.weight < targetWeight
+              ? `2 Tr ${fill} RG 0.25 w `
+              : "";
+          lines.forEach((line, index) => {
+            const baseline =
+              pageHeight -
+              box.yPos -
+              index * lineHeight -
+              (font.ascent * size) / font.unitsPerEm;
+            commands.push(
+              `BT /${ids.resource} ${size} Tf ${fill} rg ${syntheticBold}${letterSpacing} Tc ${textMatrix} ${textX} ${baseline} Tm <${encodeGlyphs(line, font)}> Tj 0 Tr ET`,
+            );
+          });
         }
       } else {
         const weight = textStyle.fontWeight;
@@ -391,18 +461,49 @@ function drawNode(
       const bottom = pageHeight - box.yPos - box.height;
       const imageValue = node.props.image;
       if (isSvgDocument(imageValue)) {
-        drawSvg(imageValue, box.xPos, bottom, box.width, box.height, fonts, fontObjects, commands);
+        drawSvg(
+          imageValue,
+          box.xPos,
+          bottom,
+          box.width,
+          box.height,
+          fonts,
+          fontObjects,
+          commands,
+        );
       } else {
         const image = asImage(imageValue);
         const ids = imageObjects.get(image);
-        if (!ids) throw new Error("Image data was not registered before PDF rendering.");
-        commands.push(`q ${box.width} 0 0 ${box.height} ${box.xPos} ${bottom} cm /${ids.resource} Do Q`);
+        if (!ids)
+          throw new Error(
+            "Image data was not registered before PDF rendering.",
+          );
+        commands.push(
+          `q ${box.width} 0 0 ${box.height} ${box.xPos} ${bottom} cm /${ids.resource} Do Q`,
+        );
       }
       drawBorders(box.xPos, bottom, box.width, box.height, style, commands);
     }
     if (node.type === "svg") {
-      const document: SvgDocument = { type: "svg-document", width: box.width, height: box.height, viewBox: String(node.props.viewBox ?? `0 0 ${box.width} ${box.height}`), children: Array.isArray(node.props.svgChildren) ? node.props.svgChildren : [] };
-      drawSvg(document, box.xPos, pageHeight - box.yPos - box.height, box.width, box.height, fonts, fontObjects, commands);
+      const document: SvgDocument = {
+        type: "svg-document",
+        width: box.width,
+        height: box.height,
+        viewBox: String(node.props.viewBox ?? `0 0 ${box.width} ${box.height}`),
+        children: Array.isArray(node.props.svgChildren)
+          ? node.props.svgChildren
+          : [],
+      };
+      drawSvg(
+        document,
+        box.xPos,
+        pageHeight - box.yPos - box.height,
+        box.width,
+        box.height,
+        fonts,
+        fontObjects,
+        commands,
+      );
     }
   }
   const children = Array.isArray(node.children)
@@ -410,44 +511,97 @@ function drawNode(
     : [node.children];
   for (const child of children)
     if (isJSXNode(child))
-      drawNode(child, pageHeight, commands, fonts, fontObjects, imageObjects, pageNumbers);
+      drawNode(
+        child,
+        pageHeight,
+        commands,
+        fonts,
+        fontObjects,
+        imageObjects,
+        pageNumbers,
+      );
 }
 
 function drawSvg(
-  svg: SvgDocument, x: number, bottom: number, width: number, height: number,
-  fonts: ReadonlyMap<string, TtfFont>, fontObjects: ReadonlyMap<TtfFont, FontObjects>, commands: string[],
+  svg: SvgDocument,
+  x: number,
+  bottom: number,
+  width: number,
+  height: number,
+  fonts: ReadonlyMap<string, TtfFont>,
+  fontObjects: ReadonlyMap<TtfFont, FontObjects>,
+  commands: string[],
 ): void {
-  const vb = (svg.viewBox ?? `0 0 ${svg.width ?? width} ${svg.height ?? height}`).trim().split(/[\s,]+/).map(Number);
-  if (vb.length !== 4 || vb.some((part) => !Number.isFinite(part)) || vb[2] <= 0 || vb[3] <= 0) return;
+  const vb = (
+    svg.viewBox ?? `0 0 ${svg.width ?? width} ${svg.height ?? height}`
+  )
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  if (
+    vb.length !== 4 ||
+    vb.some((part) => !Number.isFinite(part)) ||
+    vb[2] <= 0 ||
+    vb[3] <= 0
+  )
+    return;
   const [minX, minY, vbWidth, vbHeight] = vb;
   const scale = Math.min(width / vbWidth, height / vbHeight);
   const drawnWidth = vbWidth * scale;
   const drawnHeight = vbHeight * scale;
   const originX = x + (width - drawnWidth) / 2 - minX * scale;
-  const originY = bottom + (height - drawnHeight) / 2 + (minY + vbHeight) * scale;
-  commands.push(`q ${x} ${bottom} ${width} ${height} re W n ${scale} 0 0 ${-scale} ${originX} ${originY} cm`);
-  for (const child of svg.children) drawSvgNode(child, {}, fonts, fontObjects, commands);
+  const originY =
+    bottom + (height - drawnHeight) / 2 + (minY + vbHeight) * scale;
+  commands.push(
+    `q ${x} ${bottom} ${width} ${height} re W n ${scale} 0 0 ${-scale} ${originX} ${originY} cm`,
+  );
+  for (const child of svg.children)
+    drawSvgNode(child, {}, fonts, fontObjects, commands);
   commands.push("Q");
 }
 
 function drawSvgNode(
-  value: unknown, inherited: Record<string, unknown>, fonts: ReadonlyMap<string, TtfFont>,
-  fontObjects: ReadonlyMap<TtfFont, FontObjects>, commands: string[],
+  value: unknown,
+  inherited: Record<string, unknown>,
+  fonts: ReadonlyMap<string, TtfFont>,
+  fontObjects: ReadonlyMap<TtfFont, FontObjects>,
+  commands: string[],
 ): void {
   if (typeof value === "string" || typeof value === "number") return;
-  if (Array.isArray(value)) { for (const child of value) drawSvgNode(child, inherited, fonts, fontObjects, commands); return; }
+  if (Array.isArray(value)) {
+    for (const child of value)
+      drawSvgNode(child, inherited, fonts, fontObjects, commands);
+    return;
+  }
   if (!isJSXNode(value)) return;
   const styleProps = camelSvgStyle(asRecord(value.props.style));
   const props = { ...inherited, ...value.props, ...styleProps };
   if (typeof value.type !== "string") return;
   const tag = value.type.toLowerCase();
-  if (["defs", "clippath", "lineargradient", "radialgradient", "stop", "title", "desc", "metadata"].includes(tag)) return;
+  if (
+    [
+      "defs",
+      "clippath",
+      "lineargradient",
+      "radialgradient",
+      "stop",
+      "title",
+      "desc",
+      "metadata",
+    ].includes(tag)
+  )
+    return;
   if (tag === "g" || tag === "svg" || tag === "a") {
     commands.push("q");
     applySvgTransform(value.props.transform, commands);
-    if (props.fill !== undefined) commands.push(`${pdfColor(String(props.fill))} rg`);
-    if (props.stroke !== undefined && props.stroke !== "none") commands.push(`${pdfColor(String(props.stroke))} RG`);
-    for (const child of Array.isArray(value.children) ? value.children : [value.children]) drawSvgNode(child, props, fonts, fontObjects, commands);
+    if (props.fill !== undefined)
+      commands.push(`${pdfColor(String(props.fill))} rg`);
+    if (props.stroke !== undefined && props.stroke !== "none")
+      commands.push(`${pdfColor(String(props.stroke))} RG`);
+    for (const child of Array.isArray(value.children)
+      ? value.children
+      : [value.children])
+      drawSvgNode(child, props, fonts, fontObjects, commands);
     commands.push("Q");
     return;
   }
@@ -455,24 +609,51 @@ function drawSvgNode(
     const text = collectSvgText(value);
     const fontSize = svgNumber(props.fontSize, 12);
     const fill = svgPaint(props.fill, "black");
-    const font = resolveFont(props.fontFamily ?? inherited.fontFamily, fonts, props.fontWeight ?? inherited.fontWeight);
+    const font = resolveFont(
+      props.fontFamily ?? inherited.fontFamily,
+      fonts,
+      props.fontWeight ?? inherited.fontWeight,
+    );
     if (text && font && fill !== "none") {
       const ids = fontObjects.get(font)!;
-      const x = svgNumber(props.x, 0); const y = svgNumber(props.y, 0);
+      const x = svgNumber(props.x, 0);
+      const y = svgNumber(props.y, 0);
       const color = pdfColor(fill);
-      const targetWeight = fontWeightValue(props.fontWeight ?? inherited.fontWeight);
-      const syntheticBold = targetWeight >= 600 && font.weight < targetWeight ? `2 Tr ${color} RG 0.25 w ` : "";
-      commands.push(`BT /${ids.resource} ${fontSize} Tf ${color} rg ${syntheticBold}1 0 0 1 ${x} ${y} Tm <${encodeGlyphs(text, font)}> Tj 0 Tr ET`);
+      const targetWeight = fontWeightValue(
+        props.fontWeight ?? inherited.fontWeight,
+      );
+      const syntheticBold =
+        targetWeight >= 600 && font.weight < targetWeight
+          ? `2 Tr ${color} RG 0.25 w `
+          : "";
+      commands.push(
+        `BT /${ids.resource} ${fontSize} Tf ${color} rg ${syntheticBold}1 0 0 1 ${x} ${y} Tm <${encodeGlyphs(text, font)}> Tj 0 Tr ET`,
+      );
     } else if (text && fill !== "none") {
-      const x = svgNumber(props.x, 0); const y = svgNumber(props.y, 0);
-      const textStyle = { fontSize, fontFamily: props.fontFamily ?? inherited.fontFamily, fontWeight: props.fontWeight ?? inherited.fontWeight, color: fill };
-      const fallback = resolveFont(textStyle.fontFamily, fonts, textStyle.fontWeight);
+      const x = svgNumber(props.x, 0);
+      const y = svgNumber(props.y, 0);
+      const textStyle = {
+        fontSize,
+        fontFamily: props.fontFamily ?? inherited.fontFamily,
+        fontWeight: props.fontWeight ?? inherited.fontWeight,
+        color: fill,
+      };
+      const fallback = resolveFont(
+        textStyle.fontFamily,
+        fonts,
+        textStyle.fontWeight,
+      );
       if (fallback) {
         const ids = fontObjects.get(fallback)!;
         const color = pdfColor(fill);
         const targetWeight = fontWeightValue(textStyle.fontWeight);
-        const syntheticBold = targetWeight >= 600 && fallback.weight < targetWeight ? `2 Tr ${color} RG 0.25 w ` : "";
-        commands.push(`BT /${ids.resource} ${fontSize} Tf ${color} rg ${syntheticBold}1 0 0 1 ${x} ${y} Tm <${encodeGlyphs(text, fallback)}> Tj 0 Tr ET`);
+        const syntheticBold =
+          targetWeight >= 600 && fallback.weight < targetWeight
+            ? `2 Tr ${color} RG 0.25 w `
+            : "";
+        commands.push(
+          `BT /${ids.resource} ${fontSize} Tf ${color} rg ${syntheticBold}1 0 0 1 ${x} ${y} Tm <${encodeGlyphs(text, fallback)}> Tj 0 Tr ET`,
+        );
       }
     }
     return;
@@ -488,49 +669,91 @@ function drawSvgNode(
 }
 
 function collectSvgText(node: JSXNode): string {
-  const children = Array.isArray(node.children) ? node.children : [node.children];
-  return children.map((child) => typeof child === "string" || typeof child === "number" ? String(child) : isJSXNode(child) ? collectSvgText(child) : "").join("");
+  const children = Array.isArray(node.children)
+    ? node.children
+    : [node.children];
+  return children
+    .map((child) =>
+      typeof child === "string" || typeof child === "number"
+        ? String(child)
+        : isJSXNode(child)
+          ? collectSvgText(child)
+          : "",
+    )
+    .join("");
 }
 
-function camelSvgStyle(style: Record<string, unknown>): Record<string, unknown> {
+function camelSvgStyle(
+  style: Record<string, unknown>,
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(style)) {
-    result[key.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())] = value;
+    result[key.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())] =
+      value;
   }
   return result;
 }
 
-function svgShapePath(tag: string, p: Record<string, unknown>): string | undefined {
+function svgShapePath(
+  tag: string,
+  p: Record<string, unknown>,
+): string | undefined {
   const n = (key: string, fallback = 0) => svgNumber(p[key], fallback);
   if (tag === "path") return pathData(String(p.d ?? ""));
   if (tag === "rect") {
-    const x = n("x"), y = n("y"), w = n("width"), h = n("height");
+    const x = n("x"),
+      y = n("y"),
+      w = n("width"),
+      h = n("height");
     if (w <= 0 || h <= 0) return undefined;
-    const rx = Math.min(n("rx", n("ry")), w / 2), ry = Math.min(n("ry", rx), h / 2);
-    if (!rx && !ry) return `${x} ${y} m ${x + w} ${y} l ${x + w} ${y + h} l ${x} ${y + h} l h`;
+    const rx = Math.min(n("rx", n("ry")), w / 2),
+      ry = Math.min(n("ry", rx), h / 2);
+    if (!rx && !ry)
+      return `${x} ${y} m ${x + w} ${y} l ${x + w} ${y + h} l ${x} ${y + h} l h`;
     const k = 0.5522847498;
     return `${x + rx} ${y} m ${x + w - rx} ${y} ${x + w - rx + k * rx} ${y} ${x + w} ${y + ry - k * ry} ${x + w} ${y + ry} c ${x + w} ${y + h - ry} l ${x + w} ${y + h - ry + k * ry} ${x + w - rx + k * rx} ${y + h} ${x + w - rx} ${y + h} c ${x + rx} ${y + h} l ${x + rx - k * rx} ${y + h} ${x} ${y + h - ry + k * ry} ${x} ${y + h - ry} c ${x} ${y + ry} l ${x} ${y + ry - k * ry} ${x + rx - k * rx} ${y} ${x + rx} ${y} c h`;
   }
   if (tag === "circle" || tag === "ellipse") {
-    const cx = n("cx"), cy = n("cy"), rx = tag === "circle" ? n("r") : n("rx"), ry = tag === "circle" ? rx : n("ry");
+    const cx = n("cx"),
+      cy = n("cy"),
+      rx = tag === "circle" ? n("r") : n("rx"),
+      ry = tag === "circle" ? rx : n("ry");
     if (rx <= 0 || ry <= 0) return undefined;
     const k = 0.5522847498;
     return `${cx + rx} ${cy} m ${cx + rx} ${cy + k * ry} ${cx + k * rx} ${cy + ry} ${cx} ${cy + ry} c ${cx - k * rx} ${cy + ry} ${cx - rx} ${cy + k * ry} ${cx - rx} ${cy} c ${cx - rx} ${cy - k * ry} ${cx - k * rx} ${cy - ry} ${cx} ${cy - ry} c ${cx + k * rx} ${cy - ry} ${cx + rx} ${cy - k * ry} ${cx + rx} ${cy} c h`;
   }
   if (tag === "line") return `${n("x1")} ${n("y1")} m ${n("x2")} ${n("y2")} l`;
   if (tag === "polyline" || tag === "polygon") {
-    const points = String(p.points ?? "").trim().split(/[\s,]+/).map(Number);
-    if (points.length < 4 || points.length % 2 || points.some((point) => !Number.isFinite(point))) return undefined;
+    const points = String(p.points ?? "")
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number);
+    if (
+      points.length < 4 ||
+      points.length % 2 ||
+      points.some((point) => !Number.isFinite(point))
+    )
+      return undefined;
     let path = `${points[0]} ${points[1]} m`;
-    for (let i = 2; i < points.length; i += 2) path += ` ${points[i]} ${points[i + 1]} l`;
+    for (let i = 2; i < points.length; i += 2)
+      path += ` ${points[i]} ${points[i + 1]} l`;
     return `${path}${tag === "polygon" ? " h" : ""}`;
   }
   return undefined;
 }
 
 function pathData(d: string): string | undefined {
-  const tokens = d.match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?|[a-zA-Z]/g) ?? [];
-  let i = 0, command = "", x = 0, y = 0, sx = 0, sy = 0, previous = "", cx = 0, cy = 0;
+  const tokens =
+    d.match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?|[a-zA-Z]/g) ?? [];
+  let i = 0,
+    command = "",
+    x = 0,
+    y = 0,
+    sx = 0,
+    sy = 0,
+    previous = "",
+    cx = 0,
+    cy = 0;
   const out: string[] = [];
   const has = () => i < tokens.length && !/^[a-z]$/i.test(tokens[i]);
   const take = () => Number(tokens[i++]);
@@ -538,72 +761,272 @@ function pathData(d: string): string | undefined {
     while (i < tokens.length) {
       if (/^[a-z]$/i.test(tokens[i])) command = tokens[i++];
       if (!command) return undefined;
-      const relative = command === command.toLowerCase(), upper = command.toUpperCase();
-      const px = () => { const v = take(); return relative ? x + v : v; };
-      const py = () => { const v = take(); return relative ? y + v : v; };
-      if (upper === "Z") { out.push("h"); x = sx; y = sy; previous = "Z"; command = ""; continue; }
+      const relative = command === command.toLowerCase(),
+        upper = command.toUpperCase();
+      const px = () => {
+        const v = take();
+        return relative ? x + v : v;
+      };
+      const py = () => {
+        const v = take();
+        return relative ? y + v : v;
+      };
+      if (upper === "Z") {
+        out.push("h");
+        x = sx;
+        y = sy;
+        previous = "Z";
+        command = "";
+        continue;
+      }
       if (!has()) return undefined;
-      if (upper === "M" || upper === "L") { x = px(); y = py(); out.push(`${x} ${y} ${upper === "M" ? "m" : "l"}`); if (upper === "M") { sx = x; sy = y; command = relative ? "l" : "L"; } previous = upper; }
-      else if (upper === "H") { x = px(); out.push(`${x} ${y} l`); previous = upper; }
-      else if (upper === "V") { y = py(); out.push(`${x} ${y} l`); previous = upper; }
-      else if (upper === "C") { const x1=px(), y1=py(), x2=px(), y2=py(); x=px(); y=py(); out.push(`${x1} ${y1} ${x2} ${y2} ${x} ${y} c`); cx=x2; cy=y2; previous=upper; }
-      else if (upper === "S") { const x1 = previous === "C" || previous === "S" ? 2*x-cx : x, y1 = previous === "C" || previous === "S" ? 2*y-cy : y; const x2=px(), y2=py(); x=px(); y=py(); out.push(`${x1} ${y1} ${x2} ${y2} ${x} ${y} c`); cx=x2; cy=y2; previous=upper; }
-      else if (upper === "Q" || upper === "T") { let qx: number, qy: number; if (upper === "Q") { qx=px(); qy=py(); } else { qx=previous === "Q" || previous === "T" ? 2*x-cx : x; qy=previous === "Q" || previous === "T" ? 2*y-cy : y; } const nx=px(), ny=py(); const c1x=x+2/3*(qx-x), c1y=y+2/3*(qy-y), c2x=nx+2/3*(qx-nx), c2y=ny+2/3*(qy-ny); out.push(`${c1x} ${c1y} ${c2x} ${c2y} ${nx} ${ny} c`); x=nx; y=ny; cx=qx; cy=qy; previous=upper; }
-      else if (upper === "A") { const rx=Math.abs(take()), ry=Math.abs(take()), rot=take()*Math.PI/180, large=take(), sweep=take(), nx=px(), ny=py(); out.push(...arcToCubics(x,y,rx,ry,rot,large,sweep,nx,ny)); x=nx; y=ny; previous=upper; }
-      else return undefined;
+      if (upper === "M" || upper === "L") {
+        x = px();
+        y = py();
+        out.push(`${x} ${y} ${upper === "M" ? "m" : "l"}`);
+        if (upper === "M") {
+          sx = x;
+          sy = y;
+          command = relative ? "l" : "L";
+        }
+        previous = upper;
+      } else if (upper === "H") {
+        x = px();
+        out.push(`${x} ${y} l`);
+        previous = upper;
+      } else if (upper === "V") {
+        y = py();
+        out.push(`${x} ${y} l`);
+        previous = upper;
+      } else if (upper === "C") {
+        const x1 = px(),
+          y1 = py(),
+          x2 = px(),
+          y2 = py();
+        x = px();
+        y = py();
+        out.push(`${x1} ${y1} ${x2} ${y2} ${x} ${y} c`);
+        cx = x2;
+        cy = y2;
+        previous = upper;
+      } else if (upper === "S") {
+        const x1 = previous === "C" || previous === "S" ? 2 * x - cx : x,
+          y1 = previous === "C" || previous === "S" ? 2 * y - cy : y;
+        const x2 = px(),
+          y2 = py();
+        x = px();
+        y = py();
+        out.push(`${x1} ${y1} ${x2} ${y2} ${x} ${y} c`);
+        cx = x2;
+        cy = y2;
+        previous = upper;
+      } else if (upper === "Q" || upper === "T") {
+        let qx: number, qy: number;
+        if (upper === "Q") {
+          qx = px();
+          qy = py();
+        } else {
+          qx = previous === "Q" || previous === "T" ? 2 * x - cx : x;
+          qy = previous === "Q" || previous === "T" ? 2 * y - cy : y;
+        }
+        const nx = px(),
+          ny = py();
+        const c1x = x + (2 / 3) * (qx - x),
+          c1y = y + (2 / 3) * (qy - y),
+          c2x = nx + (2 / 3) * (qx - nx),
+          c2y = ny + (2 / 3) * (qy - ny);
+        out.push(`${c1x} ${c1y} ${c2x} ${c2y} ${nx} ${ny} c`);
+        x = nx;
+        y = ny;
+        cx = qx;
+        cy = qy;
+        previous = upper;
+      } else if (upper === "A") {
+        const rx = Math.abs(take()),
+          ry = Math.abs(take()),
+          rot = (take() * Math.PI) / 180,
+          large = take(),
+          sweep = take(),
+          nx = px(),
+          ny = py();
+        out.push(...arcToCubics(x, y, rx, ry, rot, large, sweep, nx, ny));
+        x = nx;
+        y = ny;
+        previous = upper;
+      } else return undefined;
     }
-  } catch { return undefined; }
-  return out.join(" ").replace(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:e[-+]?\d+)/gi, (value) => Number(value).toFixed(8).replace(/\.?0+$/, ""));
+  } catch {
+    return undefined;
+  }
+  return out
+    .join(" ")
+    .replace(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:e[-+]?\d+)/gi, (value) =>
+      Number(value)
+        .toFixed(8)
+        .replace(/\.?0+$/, ""),
+    );
 }
 
-function arcToCubics(x1:number,y1:number,rx0:number,ry0:number,phi:number,large:number,sweep:number,x2:number,y2:number):string[] {
-  if (!rx0 || !ry0 || (x1===x2 && y1===y2)) return [`${x2} ${y2} l`];
-  const cos=Math.cos(phi), sin=Math.sin(phi), dx=(x1-x2)/2, dy=(y1-y2)/2;
-  const xp=cos*dx+sin*dy, yp=-sin*dx+cos*dy;
-  let rx=rx0, ry=ry0; const lambda=xp*xp/(rx*rx)+yp*yp/(ry*ry); if(lambda>1){rx*=Math.sqrt(lambda);ry*=Math.sqrt(lambda);}
-  const sign=large===sweep?-1:1, den=rx*rx*yp*yp+ry*ry*xp*xp;
-  const coef=sign*Math.sqrt(Math.max(0,(rx*rx*ry*ry-den)/den));
-  const cxp=coef*(rx*yp/ry), cyp=coef*(-ry*xp/rx), cx=cos*cxp-sin*cyp+(x1+x2)/2, cy=sin*cxp+cos*cyp+(y1+y2)/2;
-  const angle=(ux:number,uy:number,vx:number,vy:number)=>Math.atan2(ux*vy-uy*vx,ux*vx+uy*vy);
-  const ux=(xp-cxp)/rx, uy=(yp-cyp)/ry, vx=(-xp-cxp)/rx, vy=(-yp-cyp)/ry;
-  let start=angle(1,0,ux,uy), delta=angle(ux,uy,vx,vy); if(!sweep&&delta>0)delta-=2*Math.PI; if(sweep&&delta<0)delta+=2*Math.PI;
-  const segments=Math.ceil(Math.abs(delta)/(Math.PI/2)), step=delta/segments, result:string[]=[];
-  const point=(a:number)=>[cx+rx*cos*Math.cos(a)-ry*sin*Math.sin(a),cy+rx*sin*Math.cos(a)+ry*cos*Math.sin(a)];
-  for(let s=0;s<segments;s++){const a=start+s*step,b=a+step,k=4/3*Math.tan((b-a)/4), p1=point(a),p2=point(b), d1=[-rx*cos*Math.sin(a)-ry*sin*Math.cos(a),-rx*sin*Math.sin(a)+ry*cos*Math.cos(a)],d2=[-rx*cos*Math.sin(b)-ry*sin*Math.cos(b),-rx*sin*Math.sin(b)+ry*cos*Math.cos(b)];result.push(`${p1[0]+k*d1[0]} ${p1[1]+k*d1[1]} ${p2[0]-k*d2[0]} ${p2[1]-k*d2[1]} ${p2[0]} ${p2[1]} c`);} return result;
+function arcToCubics(
+  x1: number,
+  y1: number,
+  rx0: number,
+  ry0: number,
+  phi: number,
+  large: number,
+  sweep: number,
+  x2: number,
+  y2: number,
+): string[] {
+  if (!rx0 || !ry0 || (x1 === x2 && y1 === y2)) return [`${x2} ${y2} l`];
+  const cos = Math.cos(phi),
+    sin = Math.sin(phi),
+    dx = (x1 - x2) / 2,
+    dy = (y1 - y2) / 2;
+  const xp = cos * dx + sin * dy,
+    yp = -sin * dx + cos * dy;
+  let rx = rx0,
+    ry = ry0;
+  const lambda = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry);
+  if (lambda > 1) {
+    rx *= Math.sqrt(lambda);
+    ry *= Math.sqrt(lambda);
+  }
+  const sign = large === sweep ? -1 : 1,
+    den = rx * rx * yp * yp + ry * ry * xp * xp;
+  const coef = sign * Math.sqrt(Math.max(0, (rx * rx * ry * ry - den) / den));
+  const cxp = coef * ((rx * yp) / ry),
+    cyp = coef * ((-ry * xp) / rx),
+    cx = cos * cxp - sin * cyp + (x1 + x2) / 2,
+    cy = sin * cxp + cos * cyp + (y1 + y2) / 2;
+  const angle = (ux: number, uy: number, vx: number, vy: number) =>
+    Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
+  const ux = (xp - cxp) / rx,
+    uy = (yp - cyp) / ry,
+    vx = (-xp - cxp) / rx,
+    vy = (-yp - cyp) / ry;
+  let start = angle(1, 0, ux, uy),
+    delta = angle(ux, uy, vx, vy);
+  if (!sweep && delta > 0) delta -= 2 * Math.PI;
+  if (sweep && delta < 0) delta += 2 * Math.PI;
+  const segments = Math.ceil(Math.abs(delta) / (Math.PI / 2)),
+    step = delta / segments,
+    result: string[] = [];
+  const point = (a: number) => [
+    cx + rx * cos * Math.cos(a) - ry * sin * Math.sin(a),
+    cy + rx * sin * Math.cos(a) + ry * cos * Math.sin(a),
+  ];
+  for (let s = 0; s < segments; s++) {
+    const a = start + s * step,
+      b = a + step,
+      k = (4 / 3) * Math.tan((b - a) / 4),
+      p1 = point(a),
+      p2 = point(b),
+      d1 = [
+        -rx * cos * Math.sin(a) - ry * sin * Math.cos(a),
+        -rx * sin * Math.sin(a) + ry * cos * Math.cos(a),
+      ],
+      d2 = [
+        -rx * cos * Math.sin(b) - ry * sin * Math.cos(b),
+        -rx * sin * Math.sin(b) + ry * cos * Math.cos(b),
+      ];
+    result.push(
+      `${p1[0] + k * d1[0]} ${p1[1] + k * d1[1]} ${p2[0] - k * d2[0]} ${p2[1] - k * d2[1]} ${p2[0]} ${p2[1]} c`,
+    );
+  }
+  return result;
 }
 
 function paintSvg(props: Record<string, unknown>, commands: string[]): void {
-  const fill = svgPaint(props.fill, "black"), stroke = svgPaint(props.stroke, "none");
-  const hasFill = fill !== "none", hasStroke = stroke !== "none";
+  const fill = svgPaint(props.fill, "black"),
+    stroke = svgPaint(props.stroke, "none");
+  const hasFill = fill !== "none",
+    hasStroke = stroke !== "none";
   if (!hasFill && !hasStroke) return;
   if (hasFill) commands.push(`${pdfColor(fill)} rg`);
-  if (hasStroke) commands.push(`${pdfColor(stroke)} RG ${svgNumber(props.strokeWidth, 1)} w`);
-  const cap = ({ butt: 0, round: 1, square: 2 } as Record<string, number>)[String(props.strokeLinecap)] ?? 0;
-  const join = ({ miter: 0, round: 1, bevel: 2 } as Record<string, number>)[String(props.strokeLinejoin)] ?? 0;
+  if (hasStroke)
+    commands.push(
+      `${pdfColor(stroke)} RG ${svgNumber(props.strokeWidth, 1)} w`,
+    );
+  const cap =
+    ({ butt: 0, round: 1, square: 2 } as Record<string, number>)[
+      String(props.strokeLinecap)
+    ] ?? 0;
+  const join =
+    ({ miter: 0, round: 1, bevel: 2 } as Record<string, number>)[
+      String(props.strokeLinejoin)
+    ] ?? 0;
   commands.push(`${cap} J ${join} j`);
-  if (typeof props.strokeDasharray === "string" && props.strokeDasharray !== "none") commands.push(`[${props.strokeDasharray.replaceAll(",", " ")}] ${svgNumber(props.strokeDashoffset, 0)} d`);
-  commands.push(hasFill && hasStroke ? (props.fillRule === "evenodd" ? "B*" : "B") : hasFill ? (props.fillRule === "evenodd" ? "f*" : "f") : "S");
+  if (
+    typeof props.strokeDasharray === "string" &&
+    props.strokeDasharray !== "none"
+  )
+    commands.push(
+      `[${props.strokeDasharray.replaceAll(",", " ")}] ${svgNumber(props.strokeDashoffset, 0)} d`,
+    );
+  commands.push(
+    hasFill && hasStroke
+      ? props.fillRule === "evenodd"
+        ? "B*"
+        : "B"
+      : hasFill
+        ? props.fillRule === "evenodd"
+          ? "f*"
+          : "f"
+        : "S",
+  );
 }
 
 function applySvgTransform(value: unknown, commands: string[]): void {
   if (typeof value !== "string") return;
-  for (const match of value.matchAll(/(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)/g)) {
-    const v=match[2].trim().split(/[\s,]+/).map(Number); if(v.some((n)=>!Number.isFinite(n)))continue;
-    if(match[1]==="matrix"&&v.length===6)commands.push(`${v.join(" ")} cm`);
-    else if(match[1]==="translate")commands.push(`1 0 0 1 ${v[0]||0} ${v[1]||0} cm`);
-    else if(match[1]==="scale")commands.push(`${v[0]} 0 0 ${v[1]??v[0]} 0 0 cm`);
-    else if(match[1]==="rotate"){const a=(v[0]*Math.PI)/180,c=Math.cos(a),s=Math.sin(a),cx=v[1]||0,cy=v[2]||0;commands.push(`1 0 0 1 ${cx} ${cy} cm ${c} ${s} ${-s} ${c} 0 0 cm 1 0 0 1 ${-cx} ${-cy} cm`);}
-    else if(match[1]==="skewX")commands.push(`1 0 ${Math.tan(v[0]*Math.PI/180)} 1 0 0 cm`);
-    else if(match[1]==="skewY")commands.push(`1 ${Math.tan(v[0]*Math.PI/180)} 0 1 0 0 cm`);
+  for (const match of value.matchAll(
+    /(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)/g,
+  )) {
+    const v = match[2]
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number);
+    if (v.some((n) => !Number.isFinite(n))) continue;
+    if (match[1] === "matrix" && v.length === 6)
+      commands.push(`${v.join(" ")} cm`);
+    else if (match[1] === "translate")
+      commands.push(`1 0 0 1 ${v[0] || 0} ${v[1] || 0} cm`);
+    else if (match[1] === "scale")
+      commands.push(`${v[0]} 0 0 ${v[1] ?? v[0]} 0 0 cm`);
+    else if (match[1] === "rotate") {
+      const a = (v[0] * Math.PI) / 180,
+        c = Math.cos(a),
+        s = Math.sin(a),
+        cx = v[1] || 0,
+        cy = v[2] || 0;
+      commands.push(
+        `1 0 0 1 ${cx} ${cy} cm ${c} ${s} ${-s} ${c} 0 0 cm 1 0 0 1 ${-cx} ${-cy} cm`,
+      );
+    } else if (match[1] === "skewX")
+      commands.push(`1 0 ${Math.tan((v[0] * Math.PI) / 180)} 1 0 0 cm`);
+    else if (match[1] === "skewY")
+      commands.push(`1 ${Math.tan((v[0] * Math.PI) / 180)} 0 1 0 0 cm`);
   }
 }
 
-function svgNumber(value: unknown, fallback: number): number { if(typeof value==="number"&&Number.isFinite(value))return value; if(typeof value==="string"){const match=/^\s*(-?(?:\d+\.?\d*|\.\d+))(?:px|pt)?\s*$/.exec(value);if(match)return Number(match[1]);}return fallback; }
-function svgPaint(value: unknown, fallback: string): string { return value === undefined ? fallback : String(value); }
-function pdfColor(value: string): string { return color(value) ?? "0 0 0"; }
+function svgNumber(value: unknown, fallback: number): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const match = /^\s*(-?(?:\d+\.?\d*|\.\d+))(?:px|pt)?\s*$/.exec(value);
+    if (match) return Number(match[1]);
+  }
+  return fallback;
+}
+function svgPaint(value: unknown, fallback: string): string {
+  return value === undefined ? fallback : String(value);
+}
+function pdfColor(value: string): string {
+  return color(value) ?? "0 0 0";
+}
 
 function asImage(value: unknown): PdfImage {
-  if (typeof value !== "object" || value === null || !("source" in value)) throw new Error("Image source was not resolved before rendering.");
+  if (typeof value !== "object" || value === null || !("source" in value))
+    throw new Error("Image source was not resolved before rendering.");
   return value as PdfImage;
 }
 
@@ -616,8 +1039,20 @@ function drawBorders(
   commands: string[],
 ): void {
   const sides = [
-    { edge: "Top", x1: x, y1: bottom + height, x2: x + width, y2: bottom + height },
-    { edge: "Right", x1: x + width, y1: bottom, x2: x + width, y2: bottom + height },
+    {
+      edge: "Top",
+      x1: x,
+      y1: bottom + height,
+      x2: x + width,
+      y2: bottom + height,
+    },
+    {
+      edge: "Right",
+      x1: x + width,
+      y1: bottom,
+      x2: x + width,
+      y2: bottom + height,
+    },
     { edge: "Bottom", x1: x, y1: bottom, x2: x + width, y2: bottom },
     { edge: "Left", x1: x, y1: bottom, x2: x, y2: bottom + height },
   ];
@@ -625,17 +1060,29 @@ function drawBorders(
     const lineWidth = numeric(style[`border${side.edge}Width`], 0);
     const lineColor = color(style[`border${side.edge}Color`]);
     const lineStyle = style[`border${side.edge}Style`];
-    if (lineWidth <= 0 || !lineColor || lineStyle === "none" || lineStyle === "hidden") continue;
-    const dash = lineStyle === "dashed" ? `[${lineWidth * 3} ${lineWidth * 2}] 0 d`
-      : lineStyle === "dotted" ? `[${lineWidth} ${lineWidth * 2}] 0 d` : "[] 0 d";
+    if (
+      lineWidth <= 0 ||
+      !lineColor ||
+      lineStyle === "none" ||
+      lineStyle === "hidden"
+    )
+      continue;
+    const dash =
+      lineStyle === "dashed"
+        ? `[${lineWidth * 3} ${lineWidth * 2}] 0 d`
+        : lineStyle === "dotted"
+          ? `[${lineWidth} ${lineWidth * 2}] 0 d`
+          : "[] 0 d";
     commands.push(`q ${lineColor} RG ${lineWidth} w ${dash}`);
     if (lineStyle === "double") {
       const offset = lineWidth;
       const horizontal = side.edge === "Top" || side.edge === "Bottom";
       const sign = side.edge === "Bottom" || side.edge === "Left" ? 1 : -1;
       for (const delta of [-offset, offset]) {
-        const shift = (delta + offset) * sign / 2;
-        commands.push(`${horizontal ? side.x1 : side.x1 + shift} ${horizontal ? side.y1 + shift : side.y1} m ${horizontal ? side.x2 : side.x2 + shift} ${horizontal ? side.y2 + shift : side.y2} l S`);
+        const shift = ((delta + offset) * sign) / 2;
+        commands.push(
+          `${horizontal ? side.x1 : side.x1 + shift} ${horizontal ? side.y1 + shift : side.y1} m ${horizontal ? side.x2 : side.x2 + shift} ${horizontal ? side.y2 + shift : side.y2} l S`,
+        );
       }
     } else {
       commands.push(`${side.x1} ${side.y1} m ${side.x2} ${side.y2} l S`);
@@ -770,7 +1217,8 @@ function pdfName(value: string): string {
 function subsetPrefix(font: TtfFont): string {
   let hash = 2166136261;
   for (const byte of font.bytes) hash = Math.imul(hash ^ byte, 16777619);
-  for (const codePoint of font.codePoints()) hash = Math.imul(hash ^ codePoint, 16777619);
+  for (const codePoint of font.codePoints())
+    hash = Math.imul(hash ^ codePoint, 16777619);
   hash = Math.imul(hash ^ font.weight, 16777619) >>> 0;
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let prefix = "";
@@ -813,7 +1261,10 @@ function color(value: unknown): string | undefined {
 }
 
 function isWhite(value: unknown): boolean {
-  return typeof value === "string" && ["white", "#fff", "#ffffff"].includes(value.toLowerCase());
+  return (
+    typeof value === "string" &&
+    ["white", "#fff", "#ffffff"].includes(value.toLowerCase())
+  );
 }
 
 function numeric(value: unknown, fallback: number): number {

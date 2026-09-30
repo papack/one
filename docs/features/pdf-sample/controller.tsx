@@ -55,12 +55,8 @@ function PageHeader() {
         justifyContent: "space-between",
       }}
     >
-      <p style={{ width: 140, fontSize: 10, fontWeight: "bold" }}>
-        NORTHWIND STUDIO
-      </p>
-      <p style={{ width: 110, fontSize: 10, color: "#667085" }}>
-        Quarterly report
-      </p>
+      <p style={{ fontSize: 10, fontWeight: "bold" }}>NORTHWIND STUDIO</p>
+      <p style={{ fontSize: 10, color: "#667085" }}>Quarterly report</p>
     </div>
   );
 }
@@ -276,7 +272,9 @@ function samplePdf(): ReadableStream<Uint8Array> {
             <p style={{ fontSize: 12, fontWeight: "bold", marginBottom: 8 }}>
               Remote URL
             </p>
-            <img src={sampleImageUrl} style={{ width: 220 }} />
+            <Center my={"8pt"}>
+              <img src={sampleImageUrl} style={{ width: 220 }} />
+            </Center>
           </div>
           <div
             style={{

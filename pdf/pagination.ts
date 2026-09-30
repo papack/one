@@ -8,11 +8,15 @@ export function paginate(element: JSXElement): JSXNode[] {
   const root = Array.isArray(element) ? element.find(isJSXNode) : element;
   if (!isJSXNode(root)) return [];
 
-  const children = Array.isArray(root.children) ? root.children : [root.children];
+  const children = Array.isArray(root.children)
+    ? root.children
+    : [root.children];
 
   // Explicit <page> nodes are paginated independently and become the returned
   // page roots. Their source-tree offsets are removed before splitting.
-  const explicitPages = children.filter((child): child is JSXNode => isJSXNode(child) && child.type === "page");
+  const explicitPages = children.filter(
+    (child): child is JSXNode => isJSXNode(child) && child.type === "page",
+  );
   if (explicitPages.length > 0) {
     const result: JSXNode[] = [];
     // Fixed elements authored at document level share the same page viewport
@@ -40,7 +44,9 @@ export function paginate(element: JSXElement): JSXNode[] {
       };
       const flow = pageFlow(localPage.layout, pageHeight);
       for (const fragment of paginateNode(flowPage, flow).values()) {
-        const fragmentChildren = Array.isArray(fragment.children) ? fragment.children : [fragment.children];
+        const fragmentChildren = Array.isArray(fragment.children)
+          ? fragment.children
+          : [fragment.children];
         result.push({
           ...fragment,
           children: [...fragmentChildren, ...fixedNodes, ...documentFixedNodes],
@@ -96,17 +102,25 @@ export function paginate(element: JSXElement): JSXNode[] {
   });
 }
 
-function stripFixedNodes(node: unknown, fixedNodes: JSXNode[], keepRoot = false): JSXNode {
+function stripFixedNodes(
+  node: unknown,
+  fixedNodes: JSXNode[],
+  keepRoot = false,
+): JSXNode {
   if (!isJSXNode(node)) return node as JSXNode;
   if (!keepRoot && asRecord(node.props.style).position === "fixed") {
     fixedNodes.push(node);
     return { ...node, children: [] };
   }
-  const children = Array.isArray(node.children) ? node.children : [node.children];
+  const children = Array.isArray(node.children)
+    ? node.children
+    : [node.children];
   const remaining: unknown[] = [];
   for (const child of children) {
-    if (isJSXNode(child) && asRecord(child.props.style).position === "fixed") fixedNodes.push(child);
-    else if (isJSXNode(child)) remaining.push(stripFixedNodes(child, fixedNodes));
+    if (isJSXNode(child) && asRecord(child.props.style).position === "fixed")
+      fixedNodes.push(child);
+    else if (isJSXNode(child))
+      remaining.push(stripFixedNodes(child, fixedNodes));
     else remaining.push(child);
   }
   return { ...node, children: remaining };
@@ -114,7 +128,9 @@ function stripFixedNodes(node: unknown, fixedNodes: JSXNode[], keepRoot = false)
 
 function shiftNode(node: JSXNode, xOffset: number, yOffset: number): JSXNode {
   const children = Array.isArray(node.children)
-    ? node.children.map((child) => isJSXNode(child) ? shiftNode(child, xOffset, yOffset) : child)
+    ? node.children.map((child) =>
+        isJSXNode(child) ? shiftNode(child, xOffset, yOffset) : child,
+      )
     : node.children;
   const layout = node.layout
     ? {
@@ -128,7 +144,10 @@ function shiftNode(node: JSXNode, xOffset: number, yOffset: number): JSXNode {
   return { ...node, children, ...(layout ? { layout } : {}) };
 }
 
-function emptyLayout(width: number, height: number): NonNullable<JSXNode["layout"]> {
+function emptyLayout(
+  width: number,
+  height: number,
+): NonNullable<JSXNode["layout"]> {
   return {
     xPos: 0,
     yPos: 0,
@@ -148,19 +167,39 @@ function paginateNode(node: unknown, flow: PageFlow): PageGroups {
   let box = currentNode.layout;
 
   if (node.type === "table") {
-    const sourceRows = Array.isArray(node.children) ? node.children : [node.children];
-    const tableHeader = sourceRows.find((row) => isJSXNode(row) && row.type === "table-row" && asRecord(row.props).tableHeader === true);
-    const repeatedHeaderHeight = isJSXNode(tableHeader) ? tableHeader.layout?.height ?? 0 : 0;
+    const sourceRows = Array.isArray(node.children)
+      ? node.children
+      : [node.children];
+    const tableHeader = sourceRows.find(
+      (row) =>
+        isJSXNode(row) &&
+        row.type === "table-row" &&
+        asRecord(row.props).tableHeader === true,
+    );
+    const repeatedHeaderHeight = isJSXNode(tableHeader)
+      ? (tableHeader.layout?.height ?? 0)
+      : 0;
     let accumulatedShift = 0;
     const rows = sourceRows.map((sourceRow) => {
-      if (!isJSXNode(sourceRow) || sourceRow.type !== "table-row" || asRecord(sourceRow.props).tableHeader === true) return sourceRow;
-      let row = accumulatedShift ? shiftNodeY(sourceRow, accumulatedShift) : sourceRow;
+      if (
+        !isJSXNode(sourceRow) ||
+        sourceRow.type !== "table-row" ||
+        asRecord(sourceRow.props).tableHeader === true
+      )
+        return sourceRow;
+      let row = accumulatedShift
+        ? shiftNodeY(sourceRow, accumulatedShift)
+        : sourceRow;
       const rowBox = row.layout;
       if (rowBox && rowBox.height <= flow.contentHeight) {
         const firstPage = pageIndexAt(rowBox.yPos, flow);
-        const lastPage = pageIndexAt(rowBox.yPos + Math.max(0, rowBox.height - 0.000001), flow);
+        const lastPage = pageIndexAt(
+          rowBox.yPos + Math.max(0, rowBox.height - 0.000001),
+          flow,
+        );
         if (lastPage > firstPage) {
-          const nextPageTop = flow.contentTop + (firstPage + 1) * flow.contentHeight;
+          const nextPageTop =
+            flow.contentTop + (firstPage + 1) * flow.contentHeight;
           const delta = nextPageTop - rowBox.yPos + repeatedHeaderHeight;
           accumulatedShift += delta;
           row = shiftNodeY(row, delta);
@@ -171,7 +210,9 @@ function paginateNode(node: unknown, flow: PageFlow): PageGroups {
     currentNode = {
       ...node,
       children: rows,
-      ...(box && accumulatedShift ? { layout: { ...box, height: box.height + accumulatedShift } } : {}),
+      ...(box && accumulatedShift
+        ? { layout: { ...box, height: box.height + accumulatedShift } }
+        : {}),
     };
     box = currentNode.layout;
   }
@@ -181,7 +222,9 @@ function paginateNode(node: unknown, flow: PageFlow): PageGroups {
   }
 
   const childGroups = new Map<number, JSXNode[]>();
-  const children = Array.isArray(currentNode.children) ? currentNode.children : [currentNode.children];
+  const children = Array.isArray(currentNode.children)
+    ? currentNode.children
+    : [currentNode.children];
   for (const child of children) {
     for (const [pageIndex, fragment] of paginateNode(child, flow)) {
       const page = childGroups.get(pageIndex) ?? [];
@@ -201,7 +244,12 @@ function paginateNode(node: unknown, flow: PageFlow): PageGroups {
   let repeatedHeader: JSXNode | undefined;
   let firstHeaderPage = 0;
   if (currentNode.type === "table") {
-    const header = children.find((child) => isJSXNode(child) && child.type === "table-row" && asRecord(child.props).tableHeader === true);
+    const header = children.find(
+      (child) =>
+        isJSXNode(child) &&
+        child.type === "table-row" &&
+        asRecord(child.props).tableHeader === true,
+    );
     if (isJSXNode(header)) {
       const headerGroups = paginateNode(header, flow);
       const headerPages = [...headerGroups.keys()].sort((a, b) => a - b);
@@ -217,7 +265,10 @@ function paginateNode(node: unknown, flow: PageFlow): PageGroups {
     const pageChildren = [...(childGroups.get(pageIndex) ?? [])];
     if (repeatedHeader && pageIndex > firstHeaderPage) {
       const targetY = flow.contentTop;
-      const repeated = shiftNodeY(repeatedHeader, targetY - (repeatedHeader.layout?.yPos ?? targetY));
+      const repeated = shiftNodeY(
+        repeatedHeader,
+        targetY - (repeatedHeader.layout?.yPos ?? targetY),
+      );
       pageChildren.unshift(repeated);
     }
     result.set(pageIndex, {
@@ -231,31 +282,41 @@ function paginateNode(node: unknown, flow: PageFlow): PageGroups {
 
 function shiftNodeY(node: JSXNode, deltaY: number): JSXNode {
   const children = Array.isArray(node.children)
-    ? node.children.map((child) => isJSXNode(child) ? shiftNodeY(child, deltaY) : child)
+    ? node.children.map((child) =>
+        isJSXNode(child) ? shiftNodeY(child, deltaY) : child,
+      )
     : node.children;
   return {
     ...node,
     children,
-    ...(node.layout ? {
-      layout: {
-        ...node.layout,
-        yPos: node.layout.yPos + deltaY,
-        contentY: node.layout.contentY + deltaY,
-      },
-    } : {}),
+    ...(node.layout
+      ? {
+          layout: {
+            ...node.layout,
+            yPos: node.layout.yPos + deltaY,
+            contentY: node.layout.contentY + deltaY,
+          },
+        }
+      : {}),
   };
 }
 
 function paginateText(node: JSXNode, flow: PageFlow): PageGroups {
   const box = node.layout!;
   const lines = box.textLines ?? [];
-  const lineHeight = positive(box.lineHeight, box.height / Math.max(1, lines.length));
+  const lineHeight = positive(
+    box.lineHeight,
+    box.height / Math.max(1, lines.length),
+  );
   const pages = new Map<number, { lines: string[]; firstLineIndex: number }>();
 
   lines.forEach((line, lineIndex) => {
     const lineY = box.yPos + lineIndex * lineHeight;
     const pageIndex = pageIndexForLine(lineY, lineHeight, flow);
-    const page = pages.get(pageIndex) ?? { lines: [], firstLineIndex: lineIndex };
+    const page = pages.get(pageIndex) ?? {
+      lines: [],
+      firstLineIndex: lineIndex,
+    };
     page.lines.push(line);
     pages.set(pageIndex, page);
   });
@@ -263,7 +324,10 @@ function paginateText(node: JSXNode, flow: PageFlow): PageGroups {
   const result: PageGroups = new Map();
   for (const [pageIndex, page] of pages) {
     const pageOffset = pageIndex * flow.contentHeight;
-    const localY = Math.max(flow.contentTop, box.yPos + page.firstLineIndex * lineHeight - pageOffset);
+    const localY = Math.max(
+      flow.contentTop,
+      box.yPos + page.firstLineIndex * lineHeight - pageOffset,
+    );
     const textLines = page.lines;
     result.set(pageIndex, {
       ...node,
@@ -294,7 +358,10 @@ function pageLocalLayout(
   const fragmentTop = Math.max(box.yPos, pageTop);
   const fragmentBottom = Math.min(nodeBottom, pageBottom);
   const contentTop = Math.max(box.contentY, fragmentTop);
-  const contentBottom = Math.min(box.contentY + box.contentHeight, fragmentBottom);
+  const contentBottom = Math.min(
+    box.contentY + box.contentHeight,
+    fragmentBottom,
+  );
 
   return {
     ...box,
@@ -307,9 +374,10 @@ function pageLocalLayout(
 
 function pageRange(y: number, height: number, flow: PageFlow): number[] {
   const first = pageIndexAt(y, flow);
-  const last = height <= 0
-    ? first
-    : Math.max(first, pageIndexAt(y + height - 0.000001, flow));
+  const last =
+    height <= 0
+      ? first
+      : Math.max(first, pageIndexAt(y + height - 0.000001, flow));
   return Array.from({ length: last - first + 1 }, (_, index) => first + index);
 }
 
@@ -317,28 +385,47 @@ function pageIndexAt(y: number, flow: PageFlow): number {
   return Math.max(0, Math.floor((y - flow.contentTop) / flow.contentHeight));
 }
 
-function pageIndexForLine(y: number, lineHeight: number, flow: PageFlow): number {
+function pageIndexForLine(
+  y: number,
+  lineHeight: number,
+  flow: PageFlow,
+): number {
   const pageIndex = pageIndexAt(y, flow);
   const pageBottom = flow.contentTop + (pageIndex + 1) * flow.contentHeight;
-  if (lineHeight <= flow.contentHeight && y + lineHeight > pageBottom) return pageIndex + 1;
+  if (lineHeight <= flow.contentHeight && y + lineHeight > pageBottom)
+    return pageIndex + 1;
   return pageIndex;
 }
 
 function pageFlow(layout: JSXNode["layout"], pageHeight: number): PageFlow {
   const contentTop = Math.max(0, layout?.contentY ?? 0);
-  const bottomPadding = Math.max(0, pageHeight - ((layout?.contentY ?? 0) + (layout?.contentHeight ?? pageHeight)));
+  const bottomPadding = Math.max(
+    0,
+    pageHeight -
+      ((layout?.contentY ?? 0) + (layout?.contentHeight ?? pageHeight)),
+  );
   const contentHeight = Math.max(1, pageHeight - contentTop - bottomPadding);
   return { contentTop, contentHeight };
 }
 
 function positive(value: number | undefined, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : fallback;
 }
 
 function isJSXNode(value: unknown): value is JSXNode {
-  return typeof value === "object" && value !== null && "type" in value && "props" in value && "children" in value;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    "props" in value &&
+    "children" in value
+  );
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null ? value as Record<string, unknown> : {};
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : {};
 }
