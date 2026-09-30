@@ -122,6 +122,31 @@ Predefined sizes are `A0` through `A6`, `LETTER`, `LEGAL`, and `TABLOID`. A cust
 
 The renderer targets PDF/A-2u and writes XMP metadata and an sRGB output intent. Text requires suitable embedded TrueType fonts.
 
+## Conditional and repeated content
+
+The PDF entry point exports `For`, `Show`, and `Repeat` for building document trees. They are evaluated once while the PDF is rendered; reactive changes after rendering are not applied.
+
+```tsx
+import { For, Repeat, Show, pdf } from "@papack/one/pdf";
+
+const stream = pdf(
+  <document style={{ fontFamily: "Roboto" }}>
+    <page>
+      <Show when={hasSummary}>
+        <p>Summary</p>
+      </Show>
+      <For each={projects}>
+        {(project) => <p>{project.name}</p>}
+      </For>
+      <Repeat n={3}>
+        <p>Repeated note</p>
+      </Repeat>
+    </page>
+  </document>,
+  { fonts },
+);
+```
+
 ## Layout and positioning
 
 `<div>` is the general-purpose layout container, and `<p>` is a paragraph. Children are not automatically arranged using flex layout. Set `display: "flex"` explicitly:
