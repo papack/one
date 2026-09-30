@@ -82,6 +82,11 @@
       "import": "./dist/layout/index.mjs",
       "require": "./dist/layout/index.cjs"
     },
+    "./pdf": {
+      "types": "./dist/pdf/index.d.mts",
+      "import": "./dist/pdf/index.mjs",
+      "require": "./dist/pdf/index.cjs"
+    },
     "./runtime": {
       "types": "./dist/runtime/index.d.mts",
       "import": "./dist/runtime/index.mjs",

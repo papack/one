@@ -16,6 +16,7 @@ export default defineConfig({
     "./cron/index.ts",
     "./log/index.ts",
     "./cache/index.ts",
+    "./pdf/index.ts",
   ],
   format: ["esm", "cjs"],
   outDir: "dist",

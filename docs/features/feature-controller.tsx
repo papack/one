@@ -2,6 +2,7 @@ import { App } from "../app";
 import { FaviconController } from "./favicon";
 import { HomeController } from "./home";
 import { StylesheetController } from "./stylesheet";
+import { PdfSampleController } from "./pdf-sample/controller";
 
 export class FeaturesController {
   private constructor() {}
@@ -9,5 +10,6 @@ export class FeaturesController {
     await FaviconController.create({ app: p.app });
     await StylesheetController.create({ app: p.app });
     await HomeController.create({ app: p.app });
+    await PdfSampleController.create({ app: p.app });
   }
 }
