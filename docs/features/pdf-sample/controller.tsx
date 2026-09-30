@@ -2,8 +2,21 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { jsx } from "@papack/one/jsx";
 import { pdf } from "@papack/one/pdf";
+import {
+  Absolute,
+  Box,
+  Center,
+  Fixed,
+  FlexItem,
+  Grid,
+  GridItem,
+  Relative,
+  Stack,
+  Text,
+} from "@papack/one/layout";
 import { App } from "../../app";
 import { Tiger } from "./tiger";
+import { font, space } from "../../../dist/style/index.mjs";
 
 const assets = new URL("./", import.meta.url);
 const roboto = new Uint8Array(await readFile(new URL("Roboto.ttf", assets)));
@@ -171,9 +184,9 @@ function samplePdf(): ReadableStream<Uint8Array> {
               </div>
               <p style={{ color: "#ff0000" }}>
                 Сегодня хороший день для новых идей. Утром город был тихим, а
-                воздух — свежим и прохладным. Я решил немного прогуляться, выпить
-                кофе и подумать о новых проектах. Иногда самые простые моменты
-                помогают лучше сосредоточиться и
+                воздух — свежим и прохладным. Я решил немного прогуляться,
+                выпить кофе и подумать о новых проектах. Иногда самые простые
+                моменты помогают лучше сосредоточиться и
               </p>
               <p style={{ fontSize: 11, color: "#d0d5dd" }}>
                 Revenue grew steadily across the quarter, with the strongest
@@ -201,15 +214,21 @@ function samplePdf(): ReadableStream<Uint8Array> {
                 turnaround time for new accounts.
               </p>
               <div style={{ display: "flex", flexDirection: "row", gap: 12 }}>
-                <div style={{ flex: 1, padding: 14, backgroundColor: "#eff8ff" }}>
+                <div
+                  style={{ flex: 1, padding: 14, backgroundColor: "#eff8ff" }}
+                >
                   <p style={{ fontSize: 10, color: "#175cd3" }}>REVENUE</p>
                   <p style={{ fontSize: 20, fontWeight: "bold" }}>$248k</p>
                 </div>
-                <div style={{ flex: 1, padding: 14, backgroundColor: "#ecfdf3" }}>
+                <div
+                  style={{ flex: 1, padding: 14, backgroundColor: "#ecfdf3" }}
+                >
                   <p style={{ fontSize: 10, color: "#027a48" }}>NEW CLIENTS</p>
                   <p style={{ fontSize: 20, fontWeight: "bold" }}>184</p>
                 </div>
-                <div style={{ flex: 1, padding: 14, backgroundColor: "#fffaeb" }}>
+                <div
+                  style={{ flex: 1, padding: 14, backgroundColor: "#fffaeb" }}
+                >
                   <p style={{ fontSize: 10, color: "#b54708" }}>RETENTION</p>
                   <p style={{ fontSize: 20, fontWeight: "bold" }}>96%</p>
                 </div>
@@ -224,8 +243,8 @@ function samplePdf(): ReadableStream<Uint8Array> {
                   style={{ fontSize: 11, lineHeight: 16, color: "#475467" }}
                 >
                   Project update {index + 1}: the team completed the planned
-                  milestones, reviewed customer feedback, and documented the next
-                  set of improvements for the upcoming release.
+                  milestones, reviewed customer feedback, and documented the
+                  next set of improvements for the upcoming release.
                 </p>
               ))}
             </div>
@@ -285,7 +304,7 @@ function samplePdf(): ReadableStream<Uint8Array> {
             <p style={{ fontSize: 12, fontWeight: "bold", marginBottom: 8 }}>
               File path
             </p>
-          <img src={sampleImagePath} style={{ width: 220 }} />
+            <img src={sampleImagePath} style={{ width: 220 }} />
           </div>
           <div
             style={{
@@ -342,7 +361,8 @@ function samplePdf(): ReadableStream<Uint8Array> {
           Merged table cells
         </p>
         <p style={{ fontSize: 11, color: "#475467", marginBottom: 16 }}>
-          Vertical writing in the first column, plus rowSpan and colSpan examples.
+          Vertical writing in the first column, plus rowSpan and colSpan
+          examples.
         </p>
         <table columns={[42, 128, 170, 170]}>
           <tr>
@@ -542,10 +562,21 @@ function samplePdf(): ReadableStream<Uint8Array> {
         <p style={{ fontSize: 11, color: "#475467", marginBottom: 18 }}>
           A small vector tiger drawn directly as JSX SVG elements.
         </p>
-        <Tiger />
+        <Box
+          p="12pt"
+          b="1pt solid #d0d5dd"
+          r="8pt"
+          bg="#fff7ed"
+          style={{ width: "100%" }}
+        >
+          <Center>
+            <Tiger />
+          </Center>
+        </Box>
         <p style={{ fontSize: 15, marginTop: 8 }}>
           Text with{" "}
-          <span style={{ fontWeight: "bold", color: "#b42318" }}>bold red</span>,{" "}
+          <span style={{ fontWeight: "bold", color: "#b42318" }}>bold red</span>
+          ,{" "}
           <span style={{ fontStyle: "italic", color: "#175cd3" }}>
             italic blue
           </span>
@@ -563,6 +594,116 @@ function samplePdf(): ReadableStream<Uint8Array> {
           <li>Second ordered step</li>
           <li>Third ordered step</li>
         </ol>
+      </page>
+      <page size="A4" style={{ padding: 40 }}>
+        <PageHeader />
+        <PageFooter />
+        <p style={{ fontSize: 24, fontWeight: "bold", marginBottom: 12 }}>
+          Layout components
+        </p>
+        <p style={{ fontSize: 11, color: "#475467", marginBottom: 18 }}>
+          Box, Center, Stack, Grid, FlexItem, GridItem, Relative, Absolute, and
+          Fixed are imported from the regular layout package.
+        </p>
+        <Stack g="12pt">
+          <Box p="12pt" bg="#eff8ff" b="1pt solid #84caff" r="8pt">
+            <p style={{ fontWeight: "bold" }}>Box</p>
+            <p>Padding, background, border, and radius.</p>
+          </Box>
+          <Center p="16pt" bg="#ecfdf3" b="1pt solid #75e0a7" r="8pt">
+            <p>Centered content</p>
+          </Center>
+          <Stack
+            g={space["3xl"]}
+            p="12pt"
+            bg="#fffaeb"
+            b="1pt solid #fec84b"
+            r="8pt"
+          >
+            <p style={{ fontWeight: "bold" }}>Nested Stack</p>
+            <p>Children arranged vertically with a gap.</p>
+          </Stack>
+        </Stack>
+      </page>
+      <page size="A4" style={{ padding: 40 }}>
+        <PageHeader />
+        <PageFooter />
+        <p style={{ fontSize: 24, fontWeight: "bold", marginBottom: 12 }}>
+          Grid and item components
+        </p>
+        <Grid grdTemplateColumns="1fr 1fr" g="12pt">
+          <GridItem p="12pt" bg="#eff8ff" b="1pt solid #84caff" r="8pt">
+            <p style={{ fontWeight: "bold" }}>GridItem</p>
+            <p>First grid cell.</p>
+          </GridItem>
+          <GridItem
+            grdColumn="span 1"
+            p="12pt"
+            bg="#ecfdf3"
+            b="1pt solid #75e0a7"
+            r="8pt"
+          >
+            <p style={{ fontWeight: "bold" }}>Second cell</p>
+            <p>Placed by the PDF grid layout.</p>
+          </GridItem>
+          <Stack g="8pt">
+            <FlexItem flxGrow="1" p="12pt" bg="#fffaeb" r="8pt">
+              <p style={{ fontWeight: "bold" }}>FlexItem</p>
+              <p>Flex sizing inside a Stack.</p>
+            </FlexItem>
+          </Stack>
+        </Grid>
+      </page>
+      <page size="A4" style={{ padding: 40 }}>
+        <PageHeader />
+        <PageFooter />
+        <p style={{ fontSize: 24, fontWeight: "bold", marginBottom: 12 }}>
+          Relative and absolute positioning
+        </p>
+        <Relative
+          p="12pt"
+          bg="#eff8ff"
+          b="1pt solid #84caff"
+          style={{ width: "150pt", height: "110pt" }}
+        >
+          <p>Relative parent</p>
+          <Absolute
+            top="-12pt"
+            right="-12pt"
+            p="8pt"
+            bg="#fef3f2"
+            b="1pt solid #fda29b"
+          >
+            <p>Absolute</p>
+          </Absolute>
+        </Relative>
+      </page>
+      <page size="A4" style={{ padding: 40 }}>
+        <PageHeader />
+        <PageFooter />
+        <p style={{ fontSize: 24, fontWeight: "bold", marginBottom: 12 }}>
+          Fixed positioning
+        </p>
+        <p>Fixed content repeats at the same page coordinates.</p>
+        <Fixed
+          right="40pt"
+          bottom="55pt"
+          p="8pt"
+          bg="#f4f3ff"
+          b="1pt solid #a4bcfd"
+        >
+          <p>Fixed footer badge</p>
+        </Fixed>
+      </page>
+      <page size="A4" style={{ padding: 0 }}>
+        <Center h="100vh" w="100vw" bg="#f2f4f7">
+          <Box p="20pt" bg="#ffffff" b="2pt solid #175cd3" r="12pt">
+            <Text fs={font.size["xs"]} fw="800">
+              Centered on the page
+            </Text>
+            <p style={{ fontSize: 12 }}>Center h="100vh" w="100vw"</p>
+          </Box>
+        </Center>
       </page>
     </document>,
     { fonts: { Roboto: { 400: roboto } } },

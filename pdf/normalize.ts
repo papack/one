@@ -55,6 +55,12 @@ export function normalize(element: JSXElement): JSXElement {
   }
 
   const style = asStyle(element.props.style);
+  if (style.fontSize !== undefined) {
+    style.fontSize = fontSizeInPoints(style.fontSize);
+  }
+  if (style.backgroundColor === undefined && style.background !== undefined) {
+    style.backgroundColor = style.background;
+  }
   let type = element.type;
   let props = element.props;
   if (type === "ol" || type === "ul") {
@@ -272,6 +278,21 @@ function asStyle(style: unknown): Record<string, unknown> {
   return typeof style === "object" && style !== null && !Array.isArray(style)
     ? (style as Record<string, unknown>)
     : {};
+}
+
+function fontSizeInPoints(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const match = /^([\d.]+)(pt|px|rem|in|mm|cm)?$/i.exec(value.trim());
+  if (!match) return value;
+  const amount = Number(match[1]);
+  switch ((match[2] ?? "pt").toLowerCase()) {
+    case "px": return amount * 0.75;
+    case "rem": return amount * 12;
+    case "in": return amount * 72;
+    case "mm": return amount * 72 / 25.4;
+    case "cm": return amount * 72 / 2.54;
+    default: return amount;
+  }
 }
 
 function isJSXNode(value: unknown): value is JSXNode {

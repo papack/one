@@ -51,7 +51,7 @@ export function gridColumns(item: LayoutItem): number[] {
   );
   const tracks = expanded.trim().split(/\s+/).filter(Boolean);
   if (!tracks.length) tracks.push("1fr");
-  const gap = number(item.style.columnGap ?? item.style.gap, 0);
+  const gap = length(item.style.columnGap ?? item.style.gap) ?? 0;
   const available = Math.max(
     0,
     item.width -
@@ -342,32 +342,63 @@ export function getEdges(
   style: Record<string, unknown>,
   kind: "margin" | "padding",
 ): Edges {
+  const edge = (value: unknown, fallback: unknown) =>
+    length(value) ?? length(fallback) ?? 0;
   return {
-    top: number(
+    top: edge(
       style[`${kind}Top`],
-      number(style[`${kind}Vertical`], number(style[kind], 0)),
+      style[`${kind}Vertical`] ?? style[kind],
     ),
-    right: number(
+    right: edge(
       style[`${kind}Right`],
-      number(style[`${kind}Horizontal`], number(style[kind], 0)),
+      style[`${kind}Horizontal`] ?? style[kind],
     ),
-    bottom: number(
+    bottom: edge(
       style[`${kind}Bottom`],
-      number(style[`${kind}Vertical`], number(style[kind], 0)),
+      style[`${kind}Vertical`] ?? style[kind],
     ),
-    left: number(
+    left: edge(
       style[`${kind}Left`],
-      number(style[`${kind}Horizontal`], number(style[kind], 0)),
+      style[`${kind}Horizontal`] ?? style[kind],
     ),
   };
+}
+
+function length(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string") return undefined;
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))(pt|px|in|mm|cm|rem)?$/i.exec(value.trim());
+  if (!match) return undefined;
+  const amount = Number(match[1]);
+  switch ((match[2] ?? "pt").toLowerCase()) {
+    case "px": return amount * 0.75;
+    case "rem": return amount * 12;
+    case "in": return amount * 72;
+    case "mm": return amount * 72 / 25.4;
+    case "cm": return amount * 72 / 2.54;
+    default: return amount;
+  }
 }
 
 export function dimension(value: unknown, basis?: number): number | undefined {
   if (typeof value === "number" && Number.isFinite(value))
     return Math.max(0, value);
-  if (typeof value === "string" && value.endsWith("%") && basis !== undefined)
-    return Math.max(0, (basis * parseFloat(value)) / 100);
-  return undefined;
+  if (typeof value !== "string") return undefined;
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))(pt|px|in|mm|cm|rem|%|vw|vh)?$/i.exec(value.trim());
+  if (!match) return undefined;
+  const amount = Number(match[1]);
+  switch ((match[2] ?? "pt").toLowerCase()) {
+    case "%":
+    case "vw":
+    case "vh":
+      return basis === undefined ? undefined : Math.max(0, (basis * amount) / 100);
+    case "px": return Math.max(0, amount * 0.75);
+    case "rem": return Math.max(0, amount * 12);
+    case "in": return Math.max(0, amount * 72);
+    case "mm": return Math.max(0, amount * 72 / 25.4);
+    case "cm": return Math.max(0, amount * 72 / 2.54);
+    default: return Math.max(0, amount);
+  }
 }
 
 export function number(value: unknown, fallback: number): number {
@@ -406,13 +437,10 @@ export function inset(
 ): number | undefined {
   const value = item.style[side];
   if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (
-    typeof value === "string" &&
-    value.endsWith("%") &&
-    Number.isFinite(parseFloat(value))
-  )
-    return (basis * parseFloat(value)) / 100;
-  return undefined;
+  if (typeof value !== "string") return undefined;
+  const match = /^(-?(?:\d+\.?\d*|\.\d+))%$/.exec(value.trim());
+  if (match) return (basis * Number(match[1])) / 100;
+  return length(value);
 }
 export function zeroEdges(): Edges {
   return { top: 0, right: 0, bottom: 0, left: 0 };
@@ -588,7 +616,7 @@ function computeWidth(
     );
     item.widthMode = explicitWidth === undefined ? "intrinsic" : "constrained";
     const columns = gridColumns(item);
-    const gap = number(item.style.columnGap ?? item.style.gap, 0);
+    const gap = length(item.style.columnGap ?? item.style.gap) ?? 0;
     const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
     flowChildren.forEach((child, index) => {
       const col = index % columns.length;
@@ -614,11 +642,10 @@ function computeWidth(
   const direction = flexDirection(item);
   const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
   const gap = isFlex
-    ? number(
+    ? length(
         item.style[direction === "row" ? "columnGap" : "rowGap"] ??
           item.style.gap,
-        0,
-      )
+      ) ?? 0
     : 0;
   const explicitWidth =
     forcedWidth ??
@@ -1077,11 +1104,10 @@ function resolveIntrinsicWidths(item: LayoutItem): void {
   if (item.widthMode !== "intrinsic") return;
   const gap =
     item.style.display === "flex"
-      ? number(
+      ? length(
           item.style[direction === "row" ? "columnGap" : "rowGap"] ??
             item.style.gap,
-          0,
-        )
+        ) ?? 0
       : 0;
   const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
   const flowWidth =
@@ -1211,7 +1237,7 @@ function computeHeight(
         outerHeight(child),
       );
     });
-    const rowGap = number(item.style.rowGap ?? item.style.gap, 0);
+    const rowGap = length(item.style.rowGap ?? item.style.gap) ?? 0;
     const naturalHeight =
       rowHeights.reduce((sum, height) => sum + height, 0) +
       rowGap * Math.max(0, rows - 1) +
@@ -1236,11 +1262,10 @@ function computeHeight(
   const direction = flexDirection(item);
   const flowChildren = item.children.filter((child) => !isOutOfFlow(child));
   const gap = isFlex
-    ? number(
+    ? length(
         item.style[direction === "row" ? "columnGap" : "rowGap"] ??
           item.style.gap,
-        0,
-      )
+      ) ?? 0
     : 0;
   const explicitHeight =
     forcedHeight ??
@@ -1478,8 +1503,8 @@ function place(
         outerHeight(child),
       );
     });
-    const columnGap = number(item.style.columnGap ?? item.style.gap, 0);
-    const rowGap = number(item.style.rowGap ?? item.style.gap, 0);
+    const columnGap = length(item.style.columnGap ?? item.style.gap) ?? 0;
+    const rowGap = length(item.style.rowGap ?? item.style.gap) ?? 0;
     const columnPositions: number[] = [];
     let cx = x + item.padding.left;
     columns.forEach((width) => {
@@ -1533,7 +1558,7 @@ function place(
       : children;
   const gap =
     item.style.display === "flex"
-      ? number(item.style[row ? "columnGap" : "rowGap"] ?? item.style.gap, 0)
+      ? length(item.style[row ? "columnGap" : "rowGap"] ?? item.style.gap) ?? 0
       : 0;
   const startX = x + item.padding.left;
   const startY = y + item.padding.top;
@@ -1611,7 +1636,17 @@ function placePositionedChildren(
 ): void {
   for (const child of item.children.filter(isOutOfFlow)) {
     const fixed = positionType(child) === "fixed";
-    const rect = fixed ? viewport : containingBlock;
+    const positionedParent = positionType(item) !== "static";
+    const rect = fixed
+      ? viewport
+      : positionedParent
+        ? {
+            x: item.layout?.xPos ?? containingBlock.x,
+            y: item.layout?.yPos ?? containingBlock.y,
+            width: item.width,
+            height: item.height,
+          }
+        : containingBlock;
     const left = inset(child, "left", rect.width);
     const right = inset(child, "right", rect.width);
     const top = inset(child, "top", rect.height);
