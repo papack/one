@@ -11,6 +11,7 @@ import {
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import type { StorageObject, StoragePort, UUID } from "./types";
+import { toNodeStream } from "./to-node-stream";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -44,7 +45,7 @@ export class FileStorage implements StoragePort {
       return uuid;
     }
 
-    return this.writeStream(data, filePath, uuid);
+    return this.writeStream(toNodeStream(data), filePath, uuid);
   }
 
   async read(

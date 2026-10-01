@@ -4,7 +4,7 @@ import type { Readable } from "node:stream";
 export type UUID = string;
 
 /** Data accepted by a storage implementation. */
-export type StorageObject = Buffer | Readable;
+export type StorageObject = Buffer | Readable | ReadableStream<Uint8Array>;
 
 /** Backwards-compatible name for data accepted by storage implementations. */
 export type StorageObjectType = StorageObject;
@@ -16,7 +16,7 @@ export type StorageObjectType = StorageObject;
  * while callers keep the same Buffer/stream API.
  */
 export interface StoragePort {
-  /** Store an object and return its generated ID. */
+  /** Store a Buffer, Node.js stream, or web byte stream and return its ID. */
   write(data: StorageObject): Promise<UUID>;
 
   /** Read an object as a Buffer (default) or a Node.js stream. */

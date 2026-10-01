@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Readable } from "node:stream";
 import type { StorageObject, StoragePort, UUID } from "./types";
+import { toNodeStream } from "./to-node-stream";
 
 /** Ephemeral storage implementation, useful for tests and short-lived data. */
 export class MemoryStorage implements StoragePort {
@@ -23,7 +24,7 @@ export class MemoryStorage implements StoragePort {
     const uuid = randomUUID();
     const object = Buffer.isBuffer(data)
       ? Buffer.from(data)
-      : await this.readStream(data);
+      : await this.readStream(toNodeStream(data));
 
     this.ensureWithinLimit(object.byteLength);
     this.objects.set(uuid, object);
